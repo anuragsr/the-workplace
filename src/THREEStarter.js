@@ -7,7 +7,7 @@ import GUI from './utils/gui'
 import { l, cl } from './utils/helpers'
 
 export default class THREEStarter {
-  constructor(opts){
+  constructor(opts) {
     this.ctn = opts.ctn
     this.w = this.ctn.width()
     this.h = this.ctn.height()
@@ -41,7 +41,7 @@ export default class THREEStarter {
     this.spotLight2 = new THREE.DirectionalLight(0xffffff, 1)
     this.lightPos2 = new THREE.Vector3(-500, 350, -500)
   }
-  init(){
+  init() {
     let { 
       ctn, w, h,
       camera, scene, renderer,
@@ -94,7 +94,7 @@ export default class THREEStarter {
     gui.add(params, 'getState')
     gui.add(params, 'message')
   }
-  toggleHelpers(val){
+  toggleHelpers(val) {
     let {
       scene, floor, axesHelper, 
       spotLightMesh1, spotLightMesh2
@@ -111,7 +111,7 @@ export default class THREEStarter {
       scene.remove(spotLightMesh2)
     }
   }
-  addObjects(){
+  addObjects() {
     let { scene } = this
     , geometry = new THREE.CylinderGeometry( 150, 150, 50, 32, 1, true )
     , material = new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffffff} )
@@ -145,7 +145,7 @@ export default class THREEStarter {
   
     renderer.setSize(w, h)
   }
-  addListeners(){
+  addListeners() {
     gsap.ticker.add(this.render.bind(this))
     window.addEventListener("resize", this.resize.bind(this), false)
   }
