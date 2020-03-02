@@ -7,9 +7,11 @@ export default class GUI{
   }
   getParams(){
     return {
-      helpers: true, 
-      message: 'Customize here',
-      getState: function () { l(this) },
+      helpers: true
+      , message: 'Customize here'
+      , defaultCam: function () { }
+      , roomCam: function () { }
+      , getState: function () { l(this) }
     }
   }
 }

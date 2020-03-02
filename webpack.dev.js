@@ -1,6 +1,7 @@
 const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     devtool: 'eval-cheap-module-source-map',
@@ -78,12 +79,20 @@ module.exports = {
                     }
                 ]
             }
+            // ,
+            // {
+            //   test: /\.(obj|mtl|fbx)$/,
+            //   loader: 'file-loader'
+            // },
         ],
     },
     plugins: [
         new HtmlWebpackPlugin({
             template: './index.html',
             inject: true
-        })
+        }),
+        new CopyWebpackPlugin([
+          { from: 'assets', to: 'assets' }
+        ])
     ]
 };
