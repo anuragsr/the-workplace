@@ -11,6 +11,7 @@ export default class GUI{
       , message: 'Customize here'
       , defaultCam: function () { }
       , roomCam: function () { }
+      , workLights: true
       , getState: function () { l(this) }
     }
   }

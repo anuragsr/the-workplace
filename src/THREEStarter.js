@@ -12,6 +12,7 @@ import { l, cl } from './utils/helpers'
 
 const texArr = [
   { floorImg: 'assets/textures/floor.png'},
+  // { floorImg: 'assets/textures/floor2.jpg'},
   { floorBump: 'assets/textures/floorBump.jpg'},
   { wallpaper1: 'assets/textures/pink-marble.jpg'},
   { wallpaper2: 'assets/textures/2875.png'},
@@ -30,7 +31,8 @@ export default class THREEStarter {
     this.roomCameraHelper = new THREE.CameraHelper(this.roomCamera)
 
     this.origin = new THREE.Vector3(0, 0, 0)
-    this.cameraStartPos = new THREE.Vector3(0, 500, 0)
+    this.cameraStartPos = new THREE.Vector3(0, 200, 500)
+    // this.cameraStartPos = new THREE.Vector3(0, 500, 0)
     this.axesHelper = new THREE.AxesHelper(500)
     
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -59,6 +61,10 @@ export default class THREEStarter {
 
     this.loader = new THREELoader()
     this.currentCamera = this.camera
+
+    // Store work lights
+    this.workLightArr = []
+
   }
   init() {
     // Initialize the scene
@@ -98,16 +104,16 @@ export default class THREEStarter {
     scene.add(roomCamera)
     scene.add(roomControls.getObject())
 
-    scene.add(new THREE.AmbientLight(0xffffff, .2))
+    scene.add(new THREE.AmbientLight(0xffffff, .4))
 
     // Spotlight and representational mesh
     spotLightMesh1.position.copy(lightPos1)  
     spotLight1.position.copy(lightPos1)
-    scene.add(spotLight1)    
+    // scene.add(spotLight1)
     
     spotLightMesh2.position.copy(lightPos2)
     spotLight2.position.copy(lightPos2)
-    scene.add(spotLight2)
+    // scene.add(spotLight2)
 
     // Plane  
     plane.rotation.x = Math.PI / 2
@@ -119,10 +125,20 @@ export default class THREEStarter {
     , he = gui.add(params, 'helpers')
     , defaultCam = gui.add(params, 'defaultCam')
     , roomCam = gui.add(params, 'roomCam')
+    , workLights = gui.add(params, 'workLights')
 
     he.onChange(value => this.toggleHelpers(value))
     defaultCam.onChange(() => { this.roomControls.unlock() })
     roomCam.onChange(() => { this.roomControls.lock() })
+    workLights.onChange(value => {
+      l(value)
+      this.workLightArr.forEach(lt => {
+        if(!value) lt.intensity = 0
+        else lt.intensity = 2
+      })
+    })
+
+
     
     // gui.add(params, 'getState')
     // gui.add(params, 'message')
@@ -172,8 +188,8 @@ export default class THREEStarter {
     renderer.setSize(w, h)
   }
   addListeners() {
-    window.THREE = THREE
-    window.scene = this.scene
+    // window.THREE = THREE
+    // window.scene = this.scene
 
     gsap.ticker.add(this.render.bind(this))
     window.addEventListener('resize', this.resize.bind(this), false)    
@@ -199,73 +215,184 @@ export default class THREEStarter {
     return new THREE.Mesh(geometry, material)
   }
   addObjects() {
-    this.addFloorAndWalls()
-    this.addWallItems()
+    this.addFloor()
+    this.addCeiling()
+    this.addWalls()
+    this.addWorkObjects()
+    this.addPlayObjects()
+    // this.addWallItems()
   }  
-  addFloorAndWalls() {
-    let { 
-      scene, floorImg, floorBump,
-      wallpaper1, wallpaper2, createMesh
-    } = this    
-    
-    // Walls
-    let wall1 = createMesh(
-      new THREE.CylinderGeometry( 150, 150, 75, 64, 1, true, 0, Math.PI ),
-      new THREE.MeshBasicMaterial({ 
-        // wireframe: true, 
-        side: THREE.DoubleSide,
-        color: 0xffffff,       
-        map: wallpaper1
-      }),
-      {
-        minFilter: THREE.LinearFilter,
-        wrapping: THREE.RepeatWrapping,
-        repeat: new THREE.Vector2(15, 2), 
-      }
-    )
-        
-    wall1.position.set(0, 37.5, 0)
-    wall1.name = "Wall1"
-    scene.add(wall1)
-
-    let wall2 = createMesh(
-      new THREE.CylinderGeometry( 150, 150, 75, 64, 1, true, Math.PI, Math.PI),
-      new THREE.MeshBasicMaterial({ 
-        // wireframe: true, 
-        side: THREE.DoubleSide,
-        color: 0xffffff,       
-        map: wallpaper2
-      }),
-      {
-        minFilter: THREE.LinearFilter,
-        wrapping: THREE.RepeatWrapping,
-        repeat: new THREE.Vector2(50, 8), 
-      }
-    )
-
-    wall2.position.set(0, 37.5, 0)
-    wall2.name = "Wall2"
-    scene.add(wall2)
-    
+  addFloor() {
+    let { scene, floorImg, floorBump, createMesh} = this
+        l(floorImg)
     // Floor
     let floor = createMesh(
       new THREE.CircleGeometry( 150, 64 ),
       new THREE.MeshPhongMaterial({ 
-        color: 0xffffff, 
+        // color: 0x00ff00, 
+        // side: THREE.DoubleSide
+        // emissive: 0xffffff, 
+        // emissiveIntensity: .2, 
         map: floorImg, 
         bumpMap: floorBump, 
         bumpScale: .1,
       })
     )
-    
-    floor.rotation.set(-Math.PI/ 2, 0, -Math.PI)
-    floor.scale.multiplyScalar(1.005)
+  
+    floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
+    // floor.scale.multiplyScalar(1.005)
     floor.name = "Floor"
+
     scene.add(floor)
+
+    // var sphere = new THREE.SphereBufferGeometry( 0.5, 16, 8 );
+
+    // //lights
+
+    // let light1 = new THREE.PointLight( 0x77ed40, 5, 100 );
+    // light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xff0040 } ) ) );
+    // light1.position.set(0, 64, 0)
+    // scene.add( light1 );
+
+
+    // gsap.fromTo(light1.position, 1, {
+    //   y: 30
+    // }, {
+    //   y: 100, repeat: -1, yoyo: true
+    // })
+  }
+  addCeiling() {
+    let { scene, createMesh} = this
+
+    // Ceiling
+    let ceilingGroup = new THREE.Group()
+    let ceiling = createMesh(
+      new THREE.CircleGeometry( 150, 64 ),
+      new THREE.MeshPhongMaterial({ 
+        color: 0x0000ff, 
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: .1
+        // emissive: 0xffffff, 
+        // emissiveIntensity: 0.1, 
+        // map: floorImg, 
+        // bumpMap: floorBump, 
+        // bumpScale: .1,
+      })
+    )
+  
+    // ceiling.rotation.set(-Math.PI/ 2, 0, -Math.PI)
+    // ceiling.rotation.set(0, 0, -Math.PI)
+    // ceiling.scale.multiplyScalar(1.005)
+    // ceiling.position.set(0, 100, 0)
+    ceiling.name = "Ceiling"
+
+    ceilingGroup.add(ceiling)
+
+    let sphere = new THREE.SphereBufferGeometry( 2, 4, 2 );
+
+    //lights
+
+    let light1 = new THREE.PointLight( 0xffffff, 2, 100 );
+    light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffffff } ) ) )
+    
+    let light2 = light1.clone()
+    , light3 = light1.clone()
+
+    ceilingGroup.add( light1, light2, light3 )
+    // ceilingGroup.add( light2 )
+    this.workLightArr.push(light1, light2, light3)
+    
+    light1.position.set(-75, -50, -10)
+    light2.position.set(0, -100, -10)
+    light3.position.set(75, -50, -10)
+
+    ceilingGroup.rotation.set(Math.PI/2, Math.PI, 0)
+    ceilingGroup.position.set(0, 75, 0)
+
+    scene.add( ceilingGroup )
+
+    // var sphereSize = 1;
+    // var pointLightHelper = new THREE.PointLightHelper( light3, sphereSize );
+    // scene.add( pointLightHelper );
+    // let light2 = new THREE.PointLight( 0xffffff, 5, 100 );
+    // light2.add( new THREE.Mesh( sphere.clone(), new THREE.MeshBasicMaterial( { color: 0xff0040 } ) ) )
+    // light2.position.set(0, 50, 0)
+    // scene.add( light2 )
+
+    // gsap.fromTo(light1.position, 1, {
+    //   y: 30
+    // }, {
+    //   y: 100, repeat: -1, yoyo: true
+    // })
+  }
+  addWalls() {
+    let { scene, wallpaper1, wallpaper2, createMesh } = this
+
+    // Walls
+    let wall1 = createMesh(
+      new THREE.CylinderGeometry( 150, 150, 75, 64, 1, true, Math.PI/2, Math.PI ),
+      // new THREE.MeshBasicMaterial({ 
+      //   // wireframe: true, 
+      //   side: THREE.DoubleSide,
+      //   color: 0xffffff,       
+      //   map: wallpaper1
+      // }),
+      // {
+      //   minFilter: THREE.LinearFilter,
+      //   wrapping: THREE.RepeatWrapping,
+      //   repeat: new THREE.Vector2(15, 2), 
+      // }
+      new THREE.MeshPhongMaterial({ 
+        color: 0x000000, 
+        side: THREE.DoubleSide
+      })
+    )
+        
+    wall1.position.set(0, 37.5, 0)
+    wall1.name = "Wall1"
+    scene.add(wall1)
+  
+    // let wall2 = createMesh(
+    //   new THREE.CylinderGeometry( 150, 150, 75, 64, 1, true, Math.PI, Math.PI),
+    //   new THREE.MeshBasicMaterial({ 
+    //     // wireframe: true, 
+    //     side: THREE.DoubleSide,
+    //     color: 0xffffff,       
+    //     map: wallpaper2
+    //   }),
+    //   {
+    //     minFilter: THREE.LinearFilter,
+    //     wrapping: THREE.RepeatWrapping,
+    //     repeat: new THREE.Vector2(50, 8), 
+    //   }
+    // )
+  
+    // wall2.position.set(0, 37.5, 0)
+    // wall2.name = "Wall2"
+    // scene.add(wall2)
+    
+    // wall2.visible = false
+  }
+  addWorkObjects(){
+    var geometry = new THREE.BoxGeometry( 10, 10, 10 );
+    var material = new THREE.MeshPhongMaterial( {color: 0xffff00} );
+    var cube = new THREE.Mesh( geometry, material );
+    this.scene.add( cube );
+    cube.position.set(-50, 20, -75)
+    
+    material = new THREE.MeshPhongMaterial( {color: 0xff1500} );
+    var cube2 = new THREE.Mesh( geometry.clone(), material );
+    this.scene.add( cube2 );
+    cube2.position.set(50, 20, -75)
+
+  }
+  addPlayObjects(){
+
   }
   addWallItems() {
     // Doors
-    let { door1, scene } = this, door2
+    let { door1, window1, scene } = this, door2
     door1.scale.multiplyScalar(.25)
     door1.position.z = 150
     door1.name = "Door 1"
@@ -276,10 +403,15 @@ export default class THREEStarter {
     door2.rotation.y = -Math.PI
     door2.name = "Door 2"
     scene.add(door2)
+
+    // Window
+    l(window1)
+    window1.scene.scale.multiplyScalar(.25)
+    scene.add( window1.scene )
   }
   preload() {
     let { renderer, loader } = this
-    , { manager, texture, fbx, obj, mtl } = loader
+    , { manager, texture, fbx, gltf } = loader
 
     manager.onStart = () => {
       l("Loading Started")
@@ -309,8 +441,12 @@ export default class THREEStarter {
       })
     })
 
-    fbx.load('assets/models/Door_Component_BI3.fbx', group => {
+    fbx.load('assets/models/door/Door_Component_BI3.fbx', group => {
       this.door1 = group
+    })
+    
+    gltf.load('assets/models/window/scene.gltf', sc => {
+      this.window1 = sc
     })
   }
 }
