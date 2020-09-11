@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
 import gsap from 'gsap'
+import Stats from 'stats.js'
 
 import GUI from './utils/gui'
 import THREELoader from './utils/loaders'
@@ -16,6 +17,11 @@ const texArr = [
   { floorBump: 'assets/textures/floorBump.jpg'},
   { wallpaper1: 'assets/textures/pink-marble.jpg'},
   { wallpaper2: 'assets/textures/2875.png'},
+  { poster1: 'assets/textures/poster1.jpg'},
+  { poster2: 'assets/textures/poster2.jpg'},
+  { poster3: 'assets/textures/poster3.jpg'},
+  { poster4: 'assets/textures/poster4.jpg'},
+  { tableTex: 'assets/textures/wood2.jpg'},
 ]
 
 export default class THREEStarter {
@@ -24,6 +30,9 @@ export default class THREEStarter {
     this.w = this.ctn.width()
     this.h = this.ctn.height()
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
     this.scene = new THREE.Scene()
 
     this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
@@ -31,8 +40,8 @@ export default class THREEStarter {
     this.roomCameraHelper = new THREE.CameraHelper(this.roomCamera)
 
     this.origin = new THREE.Vector3(0, 0, 0)
-    this.cameraStartPos = new THREE.Vector3(0, 200, 500)
-    // this.cameraStartPos = new THREE.Vector3(0, 500, 0)
+    // this.cameraStartPos = new THREE.Vector3(0, 150, 200)
+    this.cameraStartPos = new THREE.Vector3(0, 500, 0)
     this.axesHelper = new THREE.AxesHelper(500)
     
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
@@ -61,10 +70,18 @@ export default class THREEStarter {
 
     this.loader = new THREELoader()
     this.currentCamera = this.camera
+    
+    this.stats = new Stats()
+    this.stats.showPanel( 0 ) // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( this.stats.dom )
 
     // Store work lights
     this.workLightArr = []
+    this.roomHeight = 100
 
+    // For THREE Inspector    
+    // window.THREE = THREE
+    // window.scene = this.scene
   }
   init() {
     // Initialize the scene
@@ -104,7 +121,7 @@ export default class THREEStarter {
     scene.add(roomCamera)
     scene.add(roomControls.getObject())
 
-    scene.add(new THREE.AmbientLight(0xffffff, .4))
+    scene.add(new THREE.AmbientLight(0xffffff, .2))
 
     // Spotlight and representational mesh
     spotLightMesh1.position.copy(lightPos1)  
@@ -131,16 +148,13 @@ export default class THREEStarter {
     defaultCam.onChange(() => { this.roomControls.unlock() })
     roomCam.onChange(() => { this.roomControls.lock() })
     workLights.onChange(value => {
-      l(value)
       this.workLightArr.forEach(lt => {
         if(!value) lt.intensity = 0
-        else lt.intensity = 2
+        else lt.intensity = 2.5
       })
     })
 
-
-    
-    // gui.add(params, 'getState')
+    gui.add(params, 'getState')
     // gui.add(params, 'message')
   }
   toggleHelpers(val) {
@@ -151,21 +165,24 @@ export default class THREEStarter {
     if(val){
       scene.add(plane)
       scene.add(axesHelper)
-      scene.add(roomCameraHelper)
+      // scene.add(roomCameraHelper)
       scene.add(spotLightMesh1)
       scene.add(spotLightMesh2)
     } else{
       scene.remove(plane)
       scene.remove(axesHelper)
-      scene.remove(roomCameraHelper)
+      // scene.remove(roomCameraHelper)
       scene.remove(spotLightMesh1)
       scene.remove(spotLightMesh2)
     }
   }
   render() {
-    let { renderer, scene, currentCamera } = this
+    let { renderer, stats, scene, currentCamera } = this
     try{
+      stats.begin()
+      // monitored code goes here
       renderer.render(scene, currentCamera)
+      stats.end()
     } catch (err){
       l(err)
       gsap.ticker.remove(this.render.bind(this))
@@ -219,88 +236,56 @@ export default class THREEStarter {
     this.addCeiling()
     this.addWalls()
     this.addWorkObjects()
-    this.addPlayObjects()
+    // this.addPlayObjects()
     // this.addWallItems()
   }  
   addFloor() {
+    // Adding Floor
     let { scene, floorImg, floorBump, createMesh} = this
-        l(floorImg)
-    // Floor
-    let floor = createMesh(
+    , floor = createMesh(
       new THREE.CircleGeometry( 150, 64 ),
       new THREE.MeshPhongMaterial({ 
-        // color: 0x00ff00, 
-        // side: THREE.DoubleSide
-        // emissive: 0xffffff, 
-        // emissiveIntensity: .2, 
         map: floorImg, 
         bumpMap: floorBump, 
         bumpScale: .1,
       })
     )
-  
+
+    floor.receiveShadow = true
     floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
-    // floor.scale.multiplyScalar(1.005)
     floor.name = "Floor"
 
     scene.add(floor)
-
-    // var sphere = new THREE.SphereBufferGeometry( 0.5, 16, 8 );
-
-    // //lights
-
-    // let light1 = new THREE.PointLight( 0x77ed40, 5, 100 );
-    // light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xff0040 } ) ) );
-    // light1.position.set(0, 64, 0)
-    // scene.add( light1 );
-
-
-    // gsap.fromTo(light1.position, 1, {
-    //   y: 30
-    // }, {
-    //   y: 100, repeat: -1, yoyo: true
-    // })
   }
   addCeiling() {
-    let { scene, createMesh} = this
-
-    // Ceiling
-    let ceilingGroup = new THREE.Group()
-    let ceiling = createMesh(
+    
+    // Adding Ceiling
+    let { scene, roomHeight, createMesh} = this
+    , ceilingGroup = new THREE.Group()
+    , ceiling = createMesh(
       new THREE.CircleGeometry( 150, 64 ),
       new THREE.MeshPhongMaterial({ 
         color: 0x0000ff, 
         side: THREE.DoubleSide,
-        transparent: true,
-        opacity: .1
-        // emissive: 0xffffff, 
-        // emissiveIntensity: 0.1, 
-        // map: floorImg, 
-        // bumpMap: floorBump, 
-        // bumpScale: .1,
+        // transparent: true,
+        // opacity: 1
       })
     )
-  
-    // ceiling.rotation.set(-Math.PI/ 2, 0, -Math.PI)
-    // ceiling.rotation.set(0, 0, -Math.PI)
-    // ceiling.scale.multiplyScalar(1.005)
-    // ceiling.position.set(0, 100, 0)
+
+    ceiling.visible = false
     ceiling.name = "Ceiling"
-
     ceilingGroup.add(ceiling)
-
-    let sphere = new THREE.SphereBufferGeometry( 2, 4, 2 );
-
-    //lights
-
-    let light1 = new THREE.PointLight( 0xffffff, 2, 100 );
+        
+    // Lights
+    let sphere = new THREE.SphereBufferGeometry( 2, 4, 2 )
+    , light1 = new THREE.PointLight( 0xffffff, 2.5, 130 )
     light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffffff } ) ) )
-    
+    light1.castShadow = true
+
     let light2 = light1.clone()
     , light3 = light1.clone()
 
     ceilingGroup.add( light1, light2, light3 )
-    // ceilingGroup.add( light2 )
     this.workLightArr.push(light1, light2, light3)
     
     light1.position.set(-75, -50, -10)
@@ -308,31 +293,18 @@ export default class THREEStarter {
     light3.position.set(75, -50, -10)
 
     ceilingGroup.rotation.set(Math.PI/2, Math.PI, 0)
-    ceilingGroup.position.set(0, 75, 0)
+    ceilingGroup.position.set(0, roomHeight, 0)
 
     scene.add( ceilingGroup )
-
-    // var sphereSize = 1;
-    // var pointLightHelper = new THREE.PointLightHelper( light3, sphereSize );
-    // scene.add( pointLightHelper );
-    // let light2 = new THREE.PointLight( 0xffffff, 5, 100 );
-    // light2.add( new THREE.Mesh( sphere.clone(), new THREE.MeshBasicMaterial( { color: 0xff0040 } ) ) )
-    // light2.position.set(0, 50, 0)
-    // scene.add( light2 )
-
-    // gsap.fromTo(light1.position, 1, {
-    //   y: 30
-    // }, {
-    //   y: 100, repeat: -1, yoyo: true
-    // })
   }
   addWalls() {
-    let { scene, wallpaper1, wallpaper2, createMesh } = this
+    // Adding Walls
+    let { scene, roomHeight, wallpaper1, wallpaper2, createMesh } = this
 
-    // Walls
     let wall1 = createMesh(
-      new THREE.CylinderGeometry( 150, 150, 75, 64, 1, true, Math.PI/2, Math.PI ),
+      new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, Math.PI ),
       // new THREE.MeshBasicMaterial({ 
+      // new THREE.MeshPhongMaterial({ 
       //   // wireframe: true, 
       //   side: THREE.DoubleSide,
       //   color: 0xffffff,       
@@ -344,13 +316,15 @@ export default class THREEStarter {
       //   repeat: new THREE.Vector2(15, 2), 
       // }
       new THREE.MeshPhongMaterial({ 
+        // color: 0xf00fff, 
         color: 0x000000, 
         side: THREE.DoubleSide
       })
     )
         
-    wall1.position.set(0, 37.5, 0)
+    wall1.position.set(0, roomHeight / 2, 0)
     wall1.name = "Wall1"
+    // wall1.receiveShadow = true
     scene.add(wall1)
   
     // let wall2 = createMesh(
@@ -375,20 +349,164 @@ export default class THREEStarter {
     // wall2.visible = false
   }
   addWorkObjects(){
+    // this.addDummyCubes()    
+
+    let { 
+      scene, door, ac, plant1,
+      poster1, poster2, poster3, poster4, 
+      tableTex, createMesh 
+    } = this
+
+    const addTable = () => {
+      let tableGroup = new THREE.Group()
+      , st = -2
+      , tableShape = new THREE.Shape()
+        .absarc( 65, 110, 20, st, st + Math.PI, false )
+        .lineTo( 0, 148 )
+        .lineTo( -72, 129 )
+        .moveTo( -72, 129 )
+        .absarc( -65, 110, 20, -1 * st, -1 * (st + Math.PI), false )
+        .lineTo( -35, 100 )
+        .lineTo( 35, 100 )
+      , extrudeSettings = { depth: 1, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 }
+      , table = createMesh(
+        new THREE.ExtrudeBufferGeometry( tableShape, extrudeSettings ),
+        new THREE.MeshPhongMaterial({ 
+          // color: 0x008080,
+          map: tableTex, 
+        }),
+        {
+          minFilter: THREE.LinearFilter,
+          wrapping: THREE.RepeatWrapping,
+          repeat: new THREE.Vector2(.04, .04), 
+        }
+      )
+      , tableLeg1 = createMesh(
+        new THREE.CylinderGeometry( 2, 1, 25, 64, 1, false, 0, 2 * Math.PI),
+        new THREE.MeshPhongMaterial({ color: 0x000000 }),
+      )
+      
+      tableGroup.name = "Table Group"
+      scene.add(tableGroup)
+      
+      table.name = "Table"
+      table.position.set( 0, 25, 0 )
+      table.rotation.set( -Math.PI/2, 0 ,0 )
+      table.castShadow = true
+      
+      tableLeg1.castShadow = true
+      let tableLeg2 = tableLeg1.clone()
+      , tableLeg3 = tableLeg1.clone()
+      , tableLeg4 = tableLeg1.clone()
+      
+      tableLeg1.position.set( 60, 25 / 2, -95 )
+      tableLeg2.position.set( -60, 25 / 2, -95 )
+      tableLeg3.position.set( -70, 25 / 2, -125 )
+      tableLeg4.position.set( 70, 25 / 2, -125 )
+  
+      tableGroup.add(table, tableLeg1, tableLeg2, tableLeg3, tableLeg4)
+    }
+    , addPosters = () => {
+      let poster1Mesh = createMesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshPhongMaterial({ map: poster1 })
+      )
+      poster1Mesh.scale.set(1, poster1.image.height / poster1.image.width, 1)
+      poster1Mesh.position.set(-55, 50, -137)
+      poster1Mesh.rotation.set(0, .25, 0)
+      
+      let poster2Mesh = createMesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshPhongMaterial({ map: poster2 })
+      )
+      poster2Mesh.scale.set(1, poster2.image.height / poster2.image.width, 1)
+      poster2Mesh.scale.multiplyScalar(1.2)
+      poster2Mesh.position.set(-24, 50, -145)
+      poster2Mesh.rotation.set(0, .1, 0)
+  
+      let poster3Mesh = createMesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshPhongMaterial({ shininess:100,  map: poster3 })
+      )
+      poster3Mesh.scale.set(1, poster3.image.height / poster3.image.width, 1)
+      poster3Mesh.scale.multiplyScalar(2)
+      poster3Mesh.position.set(20, 55, -143)
+      poster3Mesh.rotation.set(0, -.15, 0)
+  
+      let poster4Mesh = createMesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshPhongMaterial({ map: poster4 })
+      )
+      poster4Mesh.scale.set(1, poster4.image.height / poster4.image.width, 1)
+      poster4Mesh.scale.multiplyScalar(1.2)
+      poster4Mesh.position.set(60, 50, -133)
+      poster4Mesh.rotation.set(0, -.3, 0)
+  
+      scene.add(poster1Mesh, poster2Mesh, poster3Mesh, poster4Mesh)
+    }
+    , addDoor = () => {
+      door.scale.multiplyScalar(.3)
+      door.position.set(-143, 0, -44)
+      door.rotation.set(0, 1.26, 0)
+      door.name = "Door"
+      scene.add(door)
+    }
+    , addAC = () => {
+      // Adding AC
+      ac.name = "AC"
+      ac.scale.multiplyScalar(2.42)
+      ac.position.set(-117.58, 72, -84.38)
+      ac.rotation.set(0, .92, 0)
+      scene.add(ac)
+    }
+    , addPlants = () => {
+      plant1.name = "Plant 1"
+      plant1.scale.multiplyScalar(.05)
+      plant1.position.set(-107.14, 0, -88.96)
+      plant1.rotation.set(-1.57, 0, 1.36)
+      plant1.castShadow = true
+      scene.add(plant1)
+  
+      let plant2 = plant1.clone()
+      plant2.name = "Plant 2"    
+      plant2.position.set(106.10, 0, -88.96)
+      plant2.rotation.set(-1.57, 0, 2.74)
+      scene.add(plant2)
+    }
+
+    // Adding Table, Table legs
+    addTable()    
+    // Adding Posters
+    addPosters()
+    // Adding Door
+    addDoor()    
+    // Adding Posters
+    addAC()
+    // Adding Plants
+    addPlants()   
+  }
+  addPlayObjects(){
+
+  }
+  addDummyCubes(){
     var geometry = new THREE.BoxGeometry( 10, 10, 10 );
     var material = new THREE.MeshPhongMaterial( {color: 0xffff00} );
     var cube = new THREE.Mesh( geometry, material );
     this.scene.add( cube );
-    cube.position.set(-50, 20, -75)
+    cube.position.set(-75, 20, -65)
+    cube.castShadow = true;
     
     material = new THREE.MeshPhongMaterial( {color: 0xff1500} );
     var cube2 = new THREE.Mesh( geometry.clone(), material );
     this.scene.add( cube2 );
-    cube2.position.set(50, 20, -75)
-
-  }
-  addPlayObjects(){
-
+    cube2.position.set(75, 20, -65)
+    cube2.castShadow = true;
+    
+    gsap.fromTo([
+      cube.rotation, 
+      cube2.rotation
+    ], 25, { y: 0 }
+    , { y: 2 * Math.PI, repeat: -1, yoyo: true })
   }
   addWallItems() {
     // Doors
@@ -411,7 +529,7 @@ export default class THREEStarter {
   }
   preload() {
     let { renderer, loader } = this
-    , { manager, texture, fbx, gltf } = loader
+    , { manager, texture, fbx, gltf, tds } = loader
 
     manager.onStart = () => {
       l("Loading Started")
@@ -442,11 +560,33 @@ export default class THREEStarter {
     })
 
     fbx.load('assets/models/door/Door_Component_BI3.fbx', group => {
-      this.door1 = group
+      this.door = group
     })
     
-    gltf.load('assets/models/window/scene.gltf', sc => {
-      this.window1 = sc
+    fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => {
+      this.plant1 = group.children[2]
+    })
+    
+    // fbx.load('assets/models/plant/indoor plant_02_6.1_1+2.fbx', group => {
+    //   this.plant2 = group
+    //   l(this.plant2)
+    // })
+    
+    // tds.load('assets/models/ac/klima2.3DS', group => {
+    //   // l(group)
+    //   group.children.forEach(child => {
+    //     child.material.opacity = 1
+    //     // child.material.color = 0xffffff
+    //   })
+    //   this.ac = group
+    // })
+
+    // gltf.load('assets/models/window/scene.gltf', sc => {
+    //   this.window1 = sc
+    // })
+
+    gltf.load('assets/models/ac/scene.gltf', obj => {
+      this.ac = obj.scene
     })
   }
 }

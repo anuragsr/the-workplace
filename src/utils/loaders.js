@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
+import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader'
 
 export default class THREELoader{
   constructor(){
@@ -14,6 +15,7 @@ export default class THREELoader{
     this.obj = new OBJLoader(manager)
     this.mtl = new MTLLoader(manager)
     this.fbx = new FBXLoader(manager)
+    this.tds = new TDSLoader(manager)
     this.manager = manager
   }
 }
