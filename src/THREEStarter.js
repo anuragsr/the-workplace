@@ -8,27 +8,14 @@ import Stats from 'stats.js'
 import GUI from './utils/gui'
 import THREELoader from './utils/loaders'
 import { l, cl } from './utils/helpers'
-
 // cl(); l(THREE)
-
-const texArr = [
-  { floorImg: 'assets/textures/floor.png'},
-  // { floorImg: 'assets/textures/floor2.jpg'},
-  { floorBump: 'assets/textures/floorBump.jpg'},
-  { wallpaper1: 'assets/textures/pink-marble.jpg'},
-  { wallpaper2: 'assets/textures/2875.png'},
-  { poster1: 'assets/textures/poster1.jpg'},
-  { poster2: 'assets/textures/poster2.jpg'},
-  { poster3: 'assets/textures/poster3.jpg'},
-  { poster4: 'assets/textures/poster4.jpg'},
-  { tableTex: 'assets/textures/wood2.jpg'},
-]
 
 export default class THREEStarter {
   constructor(opts) {
     this.ctn = opts.ctn
     this.w = this.ctn.width()
     this.h = this.ctn.height()
+
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -43,7 +30,9 @@ export default class THREEStarter {
     // this.cameraStartPos = new THREE.Vector3(0, 150, 200)
     this.cameraStartPos = new THREE.Vector3(0, 500, 0)
     this.axesHelper = new THREE.AxesHelper(500)
-    
+    this.axesHelper.material.opacity = 0.5
+    this.axesHelper.material.transparent = true
+
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.roomControls = new PointerLockControls(this.roomCamera, this.renderer.domElement)
 
@@ -72,16 +61,16 @@ export default class THREEStarter {
     this.currentCamera = this.camera
     
     this.stats = new Stats()
-    this.stats.showPanel( 0 ) // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild( this.stats.dom )
+    this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(this.stats.dom)
 
     // Store work lights
     this.workLightArr = []
     this.roomHeight = 100
 
     // For THREE Inspector    
-    // window.THREE = THREE
-    // window.scene = this.scene
+    window.THREE = THREE
+    window.scene = this.scene
   }
   init() {
     // Initialize the scene
@@ -94,9 +83,9 @@ export default class THREEStarter {
     // this.addObjects()
   }
   initScene(){
-    let { 
-      ctn, w, h,
-      camera, scene, renderer, roomCamera, 
+    const { 
+      ctn, w, h, camera, scene, 
+      renderer, roomCamera, 
       cameraStartPos, origin, plane, roomControls,
       spotLightMesh1, spotLight1, lightPos1,
       spotLightMesh2, spotLight2, lightPos2
@@ -136,7 +125,7 @@ export default class THREEStarter {
     plane.rotation.x = Math.PI / 2
   }
   initGUI() {
-    let guiObj = new GUI()
+    const guiObj = new GUI()
     , gui = guiObj.gui
     , params = guiObj.getParams()
     , he = gui.add(params, 'helpers')
@@ -158,7 +147,7 @@ export default class THREEStarter {
     // gui.add(params, 'message')
   }
   toggleHelpers(val) {
-    let {
+    const {
       scene, plane, axesHelper,  roomCameraHelper,
       spotLightMesh1, spotLightMesh2
     } = this
@@ -166,18 +155,23 @@ export default class THREEStarter {
       scene.add(plane)
       scene.add(axesHelper)
       // scene.add(roomCameraHelper)
-      scene.add(spotLightMesh1)
-      scene.add(spotLightMesh2)
+      // scene.add(spotLightMesh1)
+      // scene.add(spotLightMesh2)
     } else{
       scene.remove(plane)
       scene.remove(axesHelper)
       // scene.remove(roomCameraHelper)
-      scene.remove(spotLightMesh1)
-      scene.remove(spotLightMesh2)
+      // scene.remove(spotLightMesh1)
+      // scene.remove(spotLightMesh2)
     }
   }
   render() {
-    let { renderer, stats, scene, currentCamera } = this
+    const { 
+      renderer, 
+      stats, scene, 
+      currentCamera 
+    } = this
+
     try{
       stats.begin()
       // monitored code goes here
@@ -237,11 +231,10 @@ export default class THREEStarter {
     this.addWalls()
     this.addWorkObjects()
     // this.addPlayObjects()
-    // this.addWallItems()
   }  
   addFloor() {
     // Adding Floor
-    let { scene, floorImg, floorBump, createMesh} = this
+    const { scene, floorImg, floorBump, createMesh} = this
     , floor = createMesh(
       new THREE.CircleGeometry( 150, 64 ),
       new THREE.MeshPhongMaterial({ 
@@ -260,7 +253,7 @@ export default class THREEStarter {
   addCeiling() {
     
     // Adding Ceiling
-    let { scene, roomHeight, createMesh} = this
+    const { scene, roomHeight, createMesh} = this
     , ceilingGroup = new THREE.Group()
     , ceiling = createMesh(
       new THREE.CircleGeometry( 150, 64 ),
@@ -277,12 +270,12 @@ export default class THREEStarter {
     ceilingGroup.add(ceiling)
         
     // Lights
-    let sphere = new THREE.SphereBufferGeometry( 2, 4, 2 )
+    const sphere = new THREE.SphereBufferGeometry( 2, 4, 2 )
     , light1 = new THREE.PointLight( 0xffffff, 2.5, 130 )
     light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffffff } ) ) )
     light1.castShadow = true
 
-    let light2 = light1.clone()
+    const light2 = light1.clone()
     , light3 = light1.clone()
 
     ceilingGroup.add( light1, light2, light3 )
@@ -299,9 +292,8 @@ export default class THREEStarter {
   }
   addWalls() {
     // Adding Walls
-    let { scene, roomHeight, wallpaper1, wallpaper2, createMesh } = this
-
-    let wall1 = createMesh(
+    const { scene, roomHeight, wallpaper1, wallpaper2, createMesh } = this
+    , wall1 = createMesh(
       new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, Math.PI ),
       // new THREE.MeshBasicMaterial({ 
       // new THREE.MeshPhongMaterial({ 
@@ -316,15 +308,15 @@ export default class THREEStarter {
       //   repeat: new THREE.Vector2(15, 2), 
       // }
       new THREE.MeshPhongMaterial({ 
-        // color: 0xf00fff, 
-        color: 0x000000, 
-        side: THREE.DoubleSide
+        color: 0xffffff, 
+        // color: 0x000000, 
+        side: THREE.BackSide
       })
     )
         
     wall1.position.set(0, roomHeight / 2, 0)
     wall1.name = "Wall1"
-    // wall1.receiveShadow = true
+    wall1.receiveShadow = true
     scene.add(wall1)
   
     // let wall2 = createMesh(
@@ -347,17 +339,54 @@ export default class THREEStarter {
     // scene.add(wall2)
     
     // wall2.visible = false
+    // var geometry_Y = new THREE.CylinderGeometry( 155, 155, roomHeight, 64, 1, true, Math.PI/2, Math.PI );
+    // var geometry_A = new THREE.BoxBufferGeometry( 20, 20, 1 );
+    // geometry_A.translate( 0, -150, 0 );
+
+    // var bsp_A = new THREECSG(geometry_A)
+    // var bsp_Y = new THREECSG(geometry_Y)
+    // var bsp_YsubA = bsp_Y.subtract(bsp_A);
+    // var bsp_mesh = bsp_YsubA.toMesh();
+    // bsp_mesh.material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+    
+    // scene.add( bsp_mesh );
+    // let wall1 = createMesh(
+    //   new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, Math.PI ),
+    //   // new THREE.MeshBasicMaterial({ 
+    //   // new THREE.MeshPhongMaterial({ 
+    //   //   // wireframe: true, 
+    //   //   side: THREE.DoubleSide,
+    //   //   color: 0xffffff,       
+    //   //   map: wallpaper1
+    //   // }),
+    //   // {
+    //   //   minFilter: THREE.LinearFilter,
+    //   //   wrapping: THREE.RepeatWrapping,
+    //   //   repeat: new THREE.Vector2(15, 2), 
+    //   // }
+    //   new THREE.MeshPhongMaterial({ 
+    //     // color: 0xf00fff, 
+    //     color: 0x000000, 
+    //     side: THREE.DoubleSide
+    //   })
+    // )
+        
+    // wall1.position.set(0, roomHeight / 2, 0)
+    // wall1.name = "Wall1"
+    // // wall1.receiveShadow = true
+    // scene.add(wall1)
+
   }
   addWorkObjects(){
     // this.addDummyCubes()    
 
-    let { 
-      scene, door, ac, plant1,
+    const { 
+      scene, door, ac, plant1, window,
       poster1, poster2, poster3, poster4, 
-      tableTex, createMesh 
+      monitorPr, monitorSc, cpu, km,
+      tableTex, windowTex, createMesh 
     } = this
-
-    const addTable = () => {
+    , addTable = () => {
       let tableGroup = new THREE.Group()
       , st = -2
       , tableShape = new THREE.Shape()
@@ -393,6 +422,7 @@ export default class THREEStarter {
       table.position.set( 0, 25, 0 )
       table.rotation.set( -Math.PI/2, 0 ,0 )
       table.castShadow = true
+      // table.receiveShadow = true
       
       tableLeg1.castShadow = true
       let tableLeg2 = tableLeg1.clone()
@@ -412,7 +442,7 @@ export default class THREEStarter {
         new THREE.MeshPhongMaterial({ map: poster1 })
       )
       poster1Mesh.scale.set(1, poster1.image.height / poster1.image.width, 1)
-      poster1Mesh.position.set(-55, 50, -137)
+      poster1Mesh.position.set(-55, 50 + 10, -137)
       poster1Mesh.rotation.set(0, .25, 0)
       
       let poster2Mesh = createMesh(
@@ -421,16 +451,16 @@ export default class THREEStarter {
       )
       poster2Mesh.scale.set(1, poster2.image.height / poster2.image.width, 1)
       poster2Mesh.scale.multiplyScalar(1.2)
-      poster2Mesh.position.set(-24, 50, -145)
+      poster2Mesh.position.set(-24, 52 + 10, -145)
       poster2Mesh.rotation.set(0, .1, 0)
   
       let poster3Mesh = createMesh(
         new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshPhongMaterial({ shininess:100,  map: poster3 })
+        new THREE.MeshPhongMaterial({ shininess: 50, map: poster3 })
       )
       poster3Mesh.scale.set(1, poster3.image.height / poster3.image.width, 1)
       poster3Mesh.scale.multiplyScalar(2)
-      poster3Mesh.position.set(20, 55, -143)
+      poster3Mesh.position.set(20, 55 + 10, -143)
       poster3Mesh.rotation.set(0, -.15, 0)
   
       let poster4Mesh = createMesh(
@@ -439,10 +469,51 @@ export default class THREEStarter {
       )
       poster4Mesh.scale.set(1, poster4.image.height / poster4.image.width, 1)
       poster4Mesh.scale.multiplyScalar(1.2)
-      poster4Mesh.position.set(60, 50, -133)
+      poster4Mesh.position.set(60, 55 + 10, -133)
       poster4Mesh.rotation.set(0, -.3, 0)
   
       scene.add(poster1Mesh, poster2Mesh, poster3Mesh, poster4Mesh)
+    }
+    , addPC = () => {
+      const monitorGroup = new THREE.Group()
+      scene.add(monitorGroup)
+
+      monitorGroup.name = "Monitors"
+      monitorPr.name = "Primary"
+      monitorPr.position.set(-4.5, 0, 0)
+      monitorPr.rotation.set(0, -Math.PI / 2, 0)
+      // monitorPr.castShadow = true
+      monitorGroup.add(monitorPr)
+      
+      const rot = .35, monX = 24, monY = -.2, monZ = 12
+      monitorSc.name = "Secondary 1"
+      monitorSc.scale.multiplyScalar(.06)
+      monitorSc.position.set(-monX, monY, monZ)
+      monitorSc.rotation.set(0, -Math.PI / 2 + rot, 0)
+      monitorGroup.add(monitorSc)
+
+      const monitorSc2 = monitorSc.clone()
+      monitorSc2.name = "Secondary 2"
+      monitorSc2.position.set(monX, monY, monZ)
+      monitorSc2.rotation.set(0, -Math.PI / 2 - rot, 0)
+      monitorGroup.add(monitorSc2)
+
+      monitorGroup.rotation.set(0, -.08, 0)
+      monitorGroup.position.set(15, 36, -130)
+      
+      cpu.name ="CPU"
+      cpu.position.set(55, 44, -100)
+      // cpu.position.set(60.22, 40.68, -100)
+      cpu.rotation.set(0, -.4, 0)
+      cpu.scale.multiplyScalar(.4)
+      scene.add(cpu)
+
+      km.name ="Keyboard, Mouse"
+      km.scale.multiplyScalar(1.9)
+      km.position.set(13, 32.8, -102.92)
+      km.rotation.set(0, -.08, 0)
+      // l(km)
+      scene.add(km)
     }
     , addDoor = () => {
       door.scale.multiplyScalar(.3)
@@ -454,6 +525,8 @@ export default class THREEStarter {
     , addAC = () => {
       // Adding AC
       ac.name = "AC"
+      ac.traverse(child => child.isMesh && (child.castShadow = true))
+      // ac.castShadow = true
       ac.scale.multiplyScalar(2.42)
       ac.position.set(-117.58, 72, -84.38)
       ac.rotation.set(0, .92, 0)
@@ -473,17 +546,46 @@ export default class THREEStarter {
       plant2.rotation.set(-1.57, 0, 2.74)
       scene.add(plant2)
     }
+    , addWindow = () => {
+      let windowGroup = new THREE.Group()
+      windowGroup.name = "Window"
+      scene.add(windowGroup)
+      
+      window.children[0].children[0].children[0].children[0].visible = false
+      window.children[0].children[0].children[0].children[2].position.set(33.86, .98, 38.59)
+      window.scale.set(.31, .26, .25)
+      
+      const winBg = createMesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshPhongMaterial({ map: windowTex })
+      )
+      winBg.scale.set(1.37, 1.03, 1.37)
+      winBg.position.set(0, 10.48, -1.12)
 
-    // Adding Table, Table legs
-    addTable()    
-    // Adding Posters
-    addPosters()
-    // Adding Door
-    addDoor()    
-    // Adding Posters
-    addAC()
-    // Adding Plants
-    addPlants()   
+      windowGroup.add(window, winBg)
+
+      windowGroup.position.set(138, 35, -50)
+      windowGroup.rotation.set(0, -1.26, 0)
+      windowGroup.scale.multiplyScalar(1.25)
+    }
+    , addAll = () => {
+      // Adding Table, Table legs
+      addTable()    
+      // Adding Posters
+      addPosters()
+      // Adding PC
+      addPC()
+      // Adding Door
+      addDoor()    
+      // Adding Posters
+      addAC()
+      // Adding Plants
+      addPlants()
+      // Adding Window
+      addWindow()    
+    }
+
+    addAll()
   }
   addPlayObjects(){
 
@@ -508,28 +610,25 @@ export default class THREEStarter {
     ], 25, { y: 0 }
     , { y: 2 * Math.PI, repeat: -1, yoyo: true })
   }
-  addWallItems() {
-    // Doors
-    let { door1, window1, scene } = this, door2
-    door1.scale.multiplyScalar(.25)
-    door1.position.z = 150
-    door1.name = "Door 1"
-    scene.add(door1)
-
-    door2 = door1.clone()
-    door1.position.z = -150
-    door2.rotation.y = -Math.PI
-    door2.name = "Door 2"
-    scene.add(door2)
-
-    // Window
-    l(window1)
-    window1.scene.scale.multiplyScalar(.25)
-    scene.add( window1.scene )
-  }
   preload() {
-    let { renderer, loader } = this
-    , { manager, texture, fbx, gltf, tds } = loader
+    const { renderer, loader } = this
+    , { manager, texture, fbx, gltf, obj, mtl } = loader
+    , texArr = [
+      { floorImg: 'assets/textures/floor.png'},
+      { floorBump: 'assets/textures/floorBump.jpg'},
+      { wallpaper1: 'assets/textures/pink-marble.jpg'},
+      { wallpaper2: 'assets/textures/2875.png'},
+      { poster1: 'assets/textures/poster1.jpg'},
+      { poster2: 'assets/textures/poster2.jpg'},
+      { poster3: 'assets/textures/poster3.jpg'},
+      { poster4: 'assets/textures/poster4.jpg'},
+      { tableTex: 'assets/textures/wood2.jpg'},
+      { windowTex: 'assets/textures/window.jpg'},
+    ]
+    // , fbxArr = [
+    //   { door: 'assets/models/door/Door_Component_BI3.fbx' },
+    //   { plant1: 'assets/models/plant/indoor plant_02_+2.fbx' },
+    // ]
 
     manager.onStart = () => {
       l("Loading Started")
@@ -559,6 +658,15 @@ export default class THREEStarter {
       })
     })
 
+    // fbxArr.forEach(currfbx => {
+    //   let key = Object.keys(currfbx)[0]
+    //   , val = Object.values(currfbx)[0]
+
+    //   fbx.load(val, model => { 
+    //     this[key] = model
+    //   })
+    // })
+
     fbx.load('assets/models/door/Door_Component_BI3.fbx', group => {
       this.door = group
     })
@@ -566,10 +674,26 @@ export default class THREEStarter {
     fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => {
       this.plant1 = group.children[2]
     })
+
+    fbx.load('assets/models/pc/PcMonitor.fbx', group => {
+      this.monitorSc = group
+    })
+
+    mtl
+    .setPath('assets/models/pc/')
+    .load("Monitor 27' Curved.mtl", materials => {
+      materials.preload()
+      obj
+      .setPath( 'assets/models/pc/' )
+      .setMaterials( materials )
+      .load( 'Monitor-Curved.obj', object => {
+        this.monitorPr = object
+      })
+    })
     
-    // fbx.load('assets/models/plant/indoor plant_02_6.1_1+2.fbx', group => {
-    //   this.plant2 = group
-    //   l(this.plant2)
+    // obj.load('assets/models/pc/Monitor-Curved.obj', mon => {
+    //   l(mon)
+    //   this.monitorPr = mon
     // })
     
     // tds.load('assets/models/ac/klima2.3DS', group => {
@@ -581,12 +705,20 @@ export default class THREEStarter {
     //   this.ac = group
     // })
 
-    // gltf.load('assets/models/window/scene.gltf', sc => {
-    //   this.window1 = sc
-    // })
+    gltf.load('assets/models/window/scene.gltf', sc => {
+      this.window = sc.scene
+    })
 
     gltf.load('assets/models/ac/scene.gltf', obj => {
       this.ac = obj.scene
+    })
+
+    gltf.load('assets/models/pc/cpu3/scene.gltf', obj => {
+      this.cpu = obj.scene
+    })
+    
+    gltf.load('assets/models/pc/km/scene.gltf', obj => {
+      this.km = obj.scene
     })
   }
 }

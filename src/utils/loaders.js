@@ -8,8 +8,7 @@ import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader'
 
 export default class THREELoader{
   constructor(){
-    let manager = new THREE.LoadingManager()
-
+    const manager = new THREE.LoadingManager()
     this.texture = new THREE.TextureLoader(manager)
     this.gltf = new GLTFLoader(manager)
     this.obj = new OBJLoader(manager)
