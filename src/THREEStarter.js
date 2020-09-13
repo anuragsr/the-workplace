@@ -68,12 +68,13 @@ export default class THREEStarter {
 
     // Store work lights
     this.workLightArr = []
+    this.workLightIntensity = 2
     this.roomHeight = 100
 
     this.raycaster = new THREE.Raycaster()
     this.mouse = new THREE.Vector2()
 
-    this.enableInspector()
+    // this.enableInspector()
   }
   enableInspector(){
     // For THREE Inspector    
@@ -143,8 +144,9 @@ export default class THREEStarter {
     workLights.onChange(value => {
       this.workLightArr.forEach(lt => {
         if(!value) lt.intensity = 0
-        else lt.intensity = 2.5
+        else lt.intensity = this.workLightIntensity
       })
+      $(".css3d").toggleClass("lights-off")
     })
 
     gui.add(params, 'getState')
@@ -261,7 +263,7 @@ export default class THREEStarter {
   addObjects() {
     this.addFloor()
     this.addCeiling()
-    this.addWalls()
+    this.addWall()
     this.addWorkObjects()
     // this.addPlayObjects()
   }  
@@ -286,7 +288,7 @@ export default class THREEStarter {
   addCeiling() {
     
     // Adding Ceiling
-    const { scene, roomHeight, createMesh} = this
+    const { scene, roomHeight, workLightIntensity, createMesh } = this
     , ceilingGroup = new THREE.Group()
     , ceiling = createMesh(
       new THREE.CircleGeometry( 150, 64 ),
@@ -306,111 +308,48 @@ export default class THREEStarter {
         
     // Lights
     const sphere = new THREE.SphereBufferGeometry( 2, 4, 2 )
-    , light1 = new THREE.PointLight( 0xffffff, 2.5, 130 )
+    , light1 = new THREE.PointLight( 0xffffff, workLightIntensity, 130 )
     light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffffff } ) ) )
     light1.castShadow = true
 
     const light2 = light1.clone()
     , light3 = light1.clone()
+    , light4 = light1.clone()
 
-    ceilingGroup.add( light1, light2, light3 )
-    this.workLightArr.push(light1, light2, light3)
+    ceilingGroup.add(light1, light2, light3, light4)
+    this.workLightArr.push(light1, light2, light3, light4)
     
     light1.position.set(-75, -50, -10)
-    light2.position.set(0, -100, -10)
+    light2.position.set(-35, -120, -10)
     light3.position.set(75, -50, -10)
+    light4.position.set(35, -120, -10)
 
-    ceilingGroup.rotation.set(Math.PI/2, Math.PI, 0)
+    // ceilingGroup.rotation.set(0, Math.PI, 0) // Normal
+    ceilingGroup.rotation.set(Math.PI/2, Math.PI, 0)  // As Ceiling
     ceilingGroup.position.set(0, roomHeight, 0)
 
-    scene.add( ceilingGroup )
+    scene.add(ceilingGroup)
   }
-  addWalls() {
-    // Adding Walls
-    const { scene, roomHeight, wallpaper1, wallpaper2, createMesh } = this
+  addWall() {
+    // Adding Wall
+    const { scene, roomHeight, wallBg, createMesh } = this
     , wall1 = createMesh(
-      new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, Math.PI ),
-      // new THREE.MeshBasicMaterial({ 
-      // new THREE.MeshPhongMaterial({ 
-      //   // wireframe: true, 
-      //   side: THREE.DoubleSide,
-      //   color: 0xffffff,       
-      //   map: wallpaper1
-      // }),
-      // {
-      //   minFilter: THREE.LinearFilter,
-      //   wrapping: THREE.RepeatWrapping,
-      //   repeat: new THREE.Vector2(15, 2), 
-      // }
+      new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, 2 * Math.PI ),
       new THREE.MeshPhongMaterial({ 
-        // color: 0xffffff, 
-        color: 0x000000, 
-        side: THREE.BackSide
-      })
+        side: THREE.BackSide,
+        map: wallBg
+      }),
+      {
+        minFilter: THREE.LinearFilter,
+        wrapping: THREE.RepeatWrapping,
+        repeat: new THREE.Vector2(120, 15),
+      }
     )
         
     wall1.position.set(0, roomHeight / 2, 0)
-    wall1.name = "Wall1"
+    wall1.name = "Wall"
     // wall1.receiveShadow = true
     scene.add(wall1)
-  
-    // let wall2 = createMesh(
-    //   new THREE.CylinderGeometry( 150, 150, 75, 64, 1, true, Math.PI, Math.PI),
-    //   new THREE.MeshBasicMaterial({ 
-    //     // wireframe: true, 
-    //     side: THREE.DoubleSide,
-    //     color: 0xffffff,       
-    //     map: wallpaper2
-    //   }),
-    //   {
-    //     minFilter: THREE.LinearFilter,
-    //     wrapping: THREE.RepeatWrapping,
-    //     repeat: new THREE.Vector2(50, 8), 
-    //   }
-    // )
-  
-    // wall2.position.set(0, 37.5, 0)
-    // wall2.name = "Wall2"
-    // scene.add(wall2)
-    
-    // wall2.visible = false
-    // var geometry_Y = new THREE.CylinderGeometry( 155, 155, roomHeight, 64, 1, true, Math.PI/2, Math.PI );
-    // var geometry_A = new THREE.BoxBufferGeometry( 20, 20, 1 );
-    // geometry_A.translate( 0, -150, 0 );
-
-    // var bsp_A = new THREECSG(geometry_A)
-    // var bsp_Y = new THREECSG(geometry_Y)
-    // var bsp_YsubA = bsp_Y.subtract(bsp_A);
-    // var bsp_mesh = bsp_YsubA.toMesh();
-    // bsp_mesh.material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
-    
-    // scene.add( bsp_mesh );
-    // let wall1 = createMesh(
-    //   new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, Math.PI ),
-    //   // new THREE.MeshBasicMaterial({ 
-    //   // new THREE.MeshPhongMaterial({ 
-    //   //   // wireframe: true, 
-    //   //   side: THREE.DoubleSide,
-    //   //   color: 0xffffff,       
-    //   //   map: wallpaper1
-    //   // }),
-    //   // {
-    //   //   minFilter: THREE.LinearFilter,
-    //   //   wrapping: THREE.RepeatWrapping,
-    //   //   repeat: new THREE.Vector2(15, 2), 
-    //   // }
-    //   new THREE.MeshPhongMaterial({ 
-    //     // color: 0xf00fff, 
-    //     color: 0x000000, 
-    //     side: THREE.DoubleSide
-    //   })
-    // )
-        
-    // wall1.position.set(0, roomHeight / 2, 0)
-    // wall1.name = "Wall1"
-    // // wall1.receiveShadow = true
-    // scene.add(wall1)
-
   }
   addWorkObjects(){
     // this.addDummyCubes()    
@@ -418,8 +357,8 @@ export default class THREEStarter {
     const { 
       scene, scene2, door, ac, plant1, window,
       poster1, poster2, poster3, poster4, 
-      monitorPr, monitorSc, cpu, km,
-      notepad, penstand, coffee,
+      monitorPr, monitorSc, cpu, km, chair,
+      notepad, penstand, coffee, router, phone,
       tableTex, windowTex, createMesh 
     } = this
     , addTable = () => {
@@ -559,13 +498,13 @@ export default class THREEStarter {
       screenSc2.rotation.set(0, -.42, 0)
       scene2.add(screenSc2)
 
-      cpu.name ="CPU"
-      cpu.position.set(55, 44, -100)
-      cpu.rotation.set(0, -.4, 0)
-      cpu.scale.multiplyScalar(.4)
+      cpu.name = "CPU"
+      cpu.position.set(55, 27, -105)
+      cpu.rotation.set(0, -2, 0)
+      cpu.scale.multiplyScalar(4.5)
       scene.add(cpu)
 
-      km.name ="Keyboard, Mouse"
+      km.name = "Keyboard, Mouse"
       km.scale.multiplyScalar(1.9)
       km.position.set(13, 32.8, -102.92)
       km.rotation.set(0, -.08, 0)
@@ -593,9 +532,75 @@ export default class THREEStarter {
       snbGr.position.set(-30, 27.2, -110.18)
       snbGr.rotation.set(0, .32, 0)
       
-      const smoke = new CSS3DSprite($("#smoke")[0])
-      smoke.position.set(-24, 32, -112.5)
+      // const smoke = new CSS3DSprite($("#smoke")[0])
+      const smoke = new CSS3DObject($("#smoke")[0])
+      smoke.position.set(-24, 38, -111.5)
       scene2.add(smoke)
+    }
+    , addRouterAndPhone = () => {
+      router.name = "Wifi Router"
+      router.scale.multiplyScalar(.03)
+      router.rotation.set(0, Math.PI / 2 + .2, 0)
+      router.position.set(-36.54, 27.6, -120)
+      scene.add(router)
+      
+      phone.name = "Phone"
+      phone.rotation.set(0, Math.PI / 2 + .2, 0)
+      phone.position.set(-2, 27, -108)
+      phone.scale.multiplyScalar(.7)
+      scene.add(phone)
+
+      const screenPh = new CSS3DObject($("#phone")[0])
+      screenPh.rotation.set(-Math.PI/2, 0, 0 + .2)
+      screenPh.position.set(-2, 27.5, -108)
+      screenPh.scale.multiplyScalar(.7)
+      scene2.add(screenPh)
+    }
+    , addClock = () => {
+      const startTime = () => {
+        const today = new Date()
+        , wd = today.toLocaleDateString("en-US", { weekday: 'short' })
+        , h = today.getHours()
+        , m = checkTime(today.getMinutes())
+        , s = checkTime(today.getSeconds())
+        
+        $("#time").html(`${wd} ${h}:${m}:${s}`)
+        
+        setTimeout(startTime, 1000)
+      }
+      , checkTime = i => i < 10 ? `0${i}` : i
+    
+      const timeDiv = new CSS3DObject($("#time")[0])
+      timeDiv.rotation.set(0, .3, 0)
+      timeDiv.position.set(-50, 28.5, -100)
+      scene2.add(timeDiv)
+  
+      const length = 16, width = 2  
+      , extrudeSettings = {
+        steps: 1,
+        depth: 0,
+        bevelEnabled: true,
+        bevelThickness: 1,
+        bevelSize: 1,
+        bevelOffset: 0,
+        bevelSegments: 4
+      }
+      , shape = new THREE.Shape()
+      .moveTo(0,0)
+      .lineTo(0, width)
+      .lineTo(length, width)
+      .lineTo(length, 0)
+      .lineTo(0, 0)
+      , mesh = createMesh(
+        new THREE.ExtrudeBufferGeometry( shape, extrudeSettings ),
+        new THREE.MeshPhongMaterial({ color: 0x000000 })
+      )
+      mesh.name = "Clock BG"
+      scene.add(mesh)
+      mesh.rotation.set(0, .3, 0)
+      mesh.position.set(-58.03, 28, -98.48)
+
+      startTime()
     }
     , addDoor = () => {
       door.scale.multiplyScalar(.3)
@@ -650,7 +655,16 @@ export default class THREEStarter {
       windowGroup.rotation.set(0, -1.26, 0)
       windowGroup.scale.multiplyScalar(1.25)      
     }
-    , addAll = () => {
+    , addChair = () => {
+      chair.name = "Chair"
+      chair.scale.multiplyScalar(30)
+      chair.rotation.set(0, 2.9, 0)
+      chair.position.set(46, 0, -95)
+      chair.traverse(child => child.isMesh && (child.castShadow = true))
+      scene.add(chair)
+    }
+    
+    (() => {
       // Adding Table, Table legs
       addTable()    
       // Adding Posters
@@ -659,6 +673,10 @@ export default class THREEStarter {
       addPC()
       // Adding Notepad, Pen Stand, Coffee
       addStationaryAndBeverage()
+      // Adding Router, Laughing Buddha
+      addRouterAndPhone()
+      // Adding Clock
+      addClock()
       // Adding Door
       addDoor()    
       // Adding Posters
@@ -666,10 +684,10 @@ export default class THREEStarter {
       // Adding Plants
       addPlants()
       // Adding Window
-      addWindow()    
-    }
-
-    addAll()
+      addWindow()
+      // Adding Chair
+      addChair()
+    })()
   }
   addPlayObjects(){
 
@@ -700,8 +718,7 @@ export default class THREEStarter {
     , texArr = [
       { floorImg: 'assets/textures/floor.png'},
       { floorBump: 'assets/textures/floorBump.jpg'},
-      { wallpaper1: 'assets/textures/pink-marble.jpg'},
-      { wallpaper2: 'assets/textures/2875.png'},
+      { wallBg: 'assets/textures/2875.png'},
       { poster1: 'assets/textures/poster1.jpg'},
       { poster2: 'assets/textures/poster2.jpg'},
       { poster3: 'assets/textures/poster3.jpg'},
@@ -756,10 +773,13 @@ export default class THREEStarter {
     
     gltf.load('assets/models/window/scene.gltf', sc => { this.window = sc.scene })
     gltf.load('assets/models/ac/scene.gltf', obj => { this.ac = obj.scene })
-    gltf.load('assets/models/pc/cpu3/scene.gltf', obj => { this.cpu = obj.scene })
+    gltf.load('assets/models/pc/cpu_1/scene.gltf', obj => { this.cpu = obj.scene })
     gltf.load('assets/models/pc/km/scene.gltf', obj => { this.km = obj.scene })
     gltf.load('assets/models/notepad/scene.gltf', obj => { this.notepad = obj.scene })
     gltf.load('assets/models/penstand/scene.gltf', obj => { this.penstand = obj.scene })
     gltf.load('assets/models/coffee/scene.gltf', obj => { this.coffee = obj.scene })
+    gltf.load('assets/models/router/scene.gltf', obj => { this.router = obj.scene })
+    gltf.load('assets/models/phone/scene.gltf', obj => { this.phone = obj.scene })
+    gltf.load('assets/models/chair/scene.gltf', obj => { this.chair = obj.scene })
   }
 }

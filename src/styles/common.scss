@@ -1,5 +1,3 @@
-@import './vars';
-
 html, body, #three-ctn{
   height: 100%;
 	width: 100%;
@@ -14,11 +12,32 @@ body {
 
 .canvas-webGL{ @include pa(0, 0); }
 .canvas-css3D{ @include pa(0, 0); }
+.css3d{ 
+  @include pa(0, 0); 
+  &.lights-off{ opacity: .2; }
+  &#smoke{ 
+    height: 7px; width: 10px; 
+    img{ @extend %fhw; opacity: .7; } 
+  }
+  &#time{
+    height: 2.5px;
+    padding: 2.5px;
+    font-family: $clock;
+    font-size: 1.5px;
+    color: rgb(90, 231, 90);
+    overflow: inherit;
+  }
+}
 
-img.css3d{
-  @include pa(0, 0);
+img.css3d{  
   &#monitorPr{ height: 12px; width: 23px; }
   &#monitorSc1{ height: 10px; width: 20px; }
   &#monitorSc2{ height: 10px; width: 20px; }
-  &#smoke{ height: 7px; width: 10px; opacity: .7; }
+  &#phone{ height: 7px; width: 4px; }
+}
+
+@keyframes blink {
+	0% {opacity: 0}
+	49%{opacity: 0}
+	50% {opacity: 1}
 }
