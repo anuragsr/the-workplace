@@ -2,7 +2,7 @@ import $ from 'jquery'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
-import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
+import { CSS3DRenderer, CSS3DObject, CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 
 import gsap from 'gsap'
 import Stats from 'stats.js'
@@ -34,21 +34,17 @@ export default class THREEStarter {
     // this.cameraStartPos = new THREE.Vector3(0, 150, 200)
     this.cameraStartPos = new THREE.Vector3(0, 500, 0)
     this.axesHelper = new THREE.AxesHelper(500)
-    this.axesHelper.material.opacity = 0.5
+    this.axesHelper.material.opacity = .5
     this.axesHelper.material.transparent = true
+
+    this.gridHelper = new THREE.GridHelper( 1000, 50 )
+    this.gridHelper.material.opacity = .3
+    this.gridHelper.material.transparent = true
+    this.gridHelper.name = "Grid Helper"
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls2 = new OrbitControls(this.camera, this.renderer2.domElement)
-    this.roomControls = new PointerLockControls(this.roomCamera, this.renderer.domElement)
-
-    this.plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(1000, 1000, 32, 32),
-      new THREE.MeshBasicMaterial({
-        color: new THREE.Color('pink'), side: THREE.DoubleSide,
-        transparent: true, opacity: .1, wireframe: true
-      })
-    )
-    this.plane.name = "Grid Helper"
+    this.roomControls = new PointerLockControls(this.roomCamera, this.renderer.domElement)     
 
     this.spotLightMesh1 = new THREE.Mesh(
       new THREE.SphereGeometry(5, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2),
@@ -77,9 +73,12 @@ export default class THREEStarter {
     this.raycaster = new THREE.Raycaster()
     this.mouse = new THREE.Vector2()
 
+    this.enableInspector()
+  }
+  enableInspector(){
     // For THREE Inspector    
-    // window.THREE = THREE
-    // window.scene = this.scene
+    window.THREE = THREE
+    window.scene = this.scene
   }
   init() {
     // Initialize the scene
@@ -101,17 +100,11 @@ export default class THREEStarter {
     // Renderer settings
     renderer.setClearColor(0x000000, 0)    
     renderer.setSize(w, h)
-    $(renderer.domElement).css({
-      position: "absolute",
-      top: 0, left: 0
-    })
+    renderer.domElement.className = "canvas-webGL"
     ctn.append(renderer.domElement)
 
     renderer2.setSize(w, h)
-    $(renderer2.domElement).css({
-      position: "absolute",
-      top: 0, left: 0, zIndex: 0
-    })
+    renderer2.domElement.className = "canvas-css3D"
     ctn.append(renderer2.domElement)
 
     // Cameras and ambient light
@@ -134,9 +127,6 @@ export default class THREEStarter {
     spotLightMesh2.position.copy(lightPos2)
     spotLight2.position.copy(lightPos2)
     // scene.add(spotLight2)
-
-    // Plane  
-    plane.rotation.x = Math.PI / 2
   }
   initGUI() {
     const guiObj = new GUI()
@@ -162,17 +152,17 @@ export default class THREEStarter {
   }
   toggleHelpers(val) {
     const {
-      scene, plane, axesHelper,  roomCameraHelper,
-      spotLightMesh1, spotLightMesh2
+      scene, gridHelper, axesHelper, 
+      roomCameraHelper, spotLightMesh1, spotLightMesh2
     } = this
     if(val){
-      scene.add(plane)
+      scene.add(gridHelper)
       scene.add(axesHelper)
       // scene.add(roomCameraHelper)
       // scene.add(spotLightMesh1)
       // scene.add(spotLightMesh2)
     } else{
-      scene.remove(plane)
+      scene.remove(gridHelper)
       scene.remove(axesHelper)
       // scene.remove(roomCameraHelper)
       // scene.remove(spotLightMesh1)
@@ -429,6 +419,7 @@ export default class THREEStarter {
       scene, scene2, door, ac, plant1, window,
       poster1, poster2, poster3, poster4, 
       monitorPr, monitorSc, cpu, km,
+      notepad, penstand, coffee,
       tableTex, windowTex, createMesh 
     } = this
     , addTable = () => {
@@ -480,6 +471,8 @@ export default class THREEStarter {
       tableLeg4.position.set( 70, 25 / 2, -125 )
   
       tableGroup.add(table, tableLeg1, tableLeg2, tableLeg3, tableLeg4)
+      tableGroup.scale.set(.85, 1, .9)
+      tableGroup.position.set( 0, 0, -10 )
     }
     , addPosters = () => {
       let poster1Mesh = createMesh(
@@ -550,43 +543,18 @@ export default class THREEStarter {
 
       monitorGroup.rotation.set(0, -.08, 0)
       monitorGroup.position.set(15, 36, -130)
-      
-      // Animated Monitor Screens as GIFs - CSS3D Renderer
-      const gif = $("<img/>")
-      gif.prop("src", "assets/textures/website.gif")
-      gif.css({
-        height: 12, width: 23,
-        position: "absolute",
-        left: 0, top: 0
-      })
 
-      const screenPr = new CSS3DObject( gif[0] )
+      const screenPr = new CSS3DObject($("#monitorPr")[0])
       screenPr.position.set(14.25, 37, -122)
       screenPr.rotation.set(0, -.08, 0)
       scene2.add(screenPr)
       
-      const gif2 = $("<img/>")
-      gif2.prop("src", "assets/textures/coding.gif")
-      gif2.css({
-        height: 10, width: 20,
-        position: "absolute",
-        left: 0, top: 0
-      })
-
-      const screenSc1 = new CSS3DObject( gif2[0] )
+      const screenSc1 = new CSS3DObject($("#monitorSc1")[0])
       screenSc1.position.set(-10, 36, -119)
       screenSc1.rotation.set(0, .27, 0)
       scene2.add(screenSc1)
 
-      const gif3 = $("<img/>")
-      gif3.prop("src", "assets/textures/server.gif")
-      gif3.css({
-        height: 10, width: 20,
-        position: "absolute",
-        left: 0, top: 0
-      })
-
-      const screenSc2 = new CSS3DObject( gif3[0] )
+      const screenSc2 = new CSS3DObject($("#monitorSc2")[0])
       screenSc2.position.set(37.5, 36, -115.5)
       screenSc2.rotation.set(0, -.42, 0)
       scene2.add(screenSc2)
@@ -604,7 +572,30 @@ export default class THREEStarter {
       scene.add(km)
     }
     , addStationaryAndBeverage = () => {
+      const snbGr = new THREE.Group()
+      snbGr.name = "Stationary & Beverage"
+      scene.add(snbGr)
 
+      notepad.name = "NotePad"
+      notepad.scale.multiplyScalar(25)
+      snbGr.add(notepad)
+            
+      penstand.name = "Pen Stand"
+      penstand.position.set(14, -35.8, -5)
+      penstand.scale.multiplyScalar(1.68)
+      snbGr.add(penstand)
+      
+      coffee.name = "Coffee"
+      coffee.position.set(0, -19, 7)
+      coffee.scale.multiplyScalar(.75)
+      snbGr.add(coffee)
+
+      snbGr.position.set(-30, 27.2, -110.18)
+      snbGr.rotation.set(0, .32, 0)
+      
+      const smoke = new CSS3DSprite($("#smoke")[0])
+      smoke.position.set(-24, 32, -112.5)
+      scene2.add(smoke)
     }
     , addDoor = () => {
       door.scale.multiplyScalar(.3)
@@ -762,8 +753,8 @@ export default class THREEStarter {
     fbx.load('assets/models/door/Door_Component_BI3.fbx', group => { this.door = group })
     fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => { this.plant1 = group.children[2] })
     fbx.load('assets/models/pc/PcMonitor.fbx', group => { this.monitorSc = group })        
+    
     gltf.load('assets/models/window/scene.gltf', sc => { this.window = sc.scene })
-
     gltf.load('assets/models/ac/scene.gltf', obj => { this.ac = obj.scene })
     gltf.load('assets/models/pc/cpu3/scene.gltf', obj => { this.cpu = obj.scene })
     gltf.load('assets/models/pc/km/scene.gltf', obj => { this.km = obj.scene })

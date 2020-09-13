@@ -1,3 +1,5 @@
+@import './vars';
+
 html, body, #three-ctn{
   height: 100%;
 	width: 100%;
@@ -6,6 +8,17 @@ html, body, #three-ctn{
 body {
   font-family: 'Courier New', Courier, monospace;
   background: rgb(36, 41, 46);
-  color: #fff;
   text-align: center;
+  color: $w;
+}
+
+.canvas-webGL{ @include pa(0, 0); }
+.canvas-css3D{ @include pa(0, 0); }
+
+img.css3d{
+  @include pa(0, 0);
+  &#monitorPr{ height: 12px; width: 23px; }
+  &#monitorSc1{ height: 10px; width: 20px; }
+  &#monitorSc2{ height: 10px; width: 20px; }
+  &#smoke{ height: 7px; width: 10px; opacity: .7; }
 }
