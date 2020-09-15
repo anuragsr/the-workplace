@@ -9,11 +9,20 @@ body {
   color: $w;
 }
 
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
 .canvas-webGL{ @include pa(0, 0); }
 .canvas-css3D{ @include pa(0, 0); }
 .css3d{ 
   @include pa(0, 0);
-  opacity: 0;
+  // opacity: 0;
   &.lights-off{ opacity: .2; }
   &#smoke{ 
     height: 7px; width: 10px; 

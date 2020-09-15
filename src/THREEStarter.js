@@ -8,6 +8,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader'
 
 import gsap, { Linear } from 'gsap'
 import Stats from 'stats.js'
@@ -96,7 +97,7 @@ export default class THREEStarter {
 
     $('body').waitForImages(() => {
       l('All images have loaded.')
-      this.addWorkObjectSequence()
+      this.addObjects()
     } 
     // , function(loaded, count, success) {
     //     l((loaded + 1) + ' of ' + count  + ' images has ' + (success ? 'loaded' : 'failed to load') +  '.')
@@ -263,7 +264,7 @@ export default class THREEStarter {
     // window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
     // window.addEventListener('click', this.onMouseClick.bind(this), false)
 
-    this.roomControls.addEventListener('lock', () => {      
+    this.roomControls.addEventListener('lock', () => {
       this.currentCamera = this.roomCamera 
       this.controls.enabled = false
     })
@@ -283,138 +284,46 @@ export default class THREEStarter {
     // return { geometry, material, mesh: new THREE.Mesh(geometry, material) }
     return new THREE.Mesh(geometry, material)
   }
-  addObjects() {
-    this.addFloor()
-    this.addCeiling()
-    this.addWall()
-    this.addWorkObjects()
-  }  
-  addFloor() {
-    // Adding Floor
-    const { scene, floorImg, floorBump, createMesh} = this
-    , floor = createMesh(
-      new THREE.CircleGeometry( 150, 64 ),
-      new THREE.MeshPhongMaterial({ 
-        map: floorImg, 
-        bumpMap: floorBump, 
-        bumpScale: .1,
-      })
-    )
-
-    floor.receiveShadow = true
-    floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
-    floor.name = "Floor"
-
-    scene.add(floor)
-  }
-  addCeiling() {
-    
-    // Adding Ceiling
-    const { scene, roomHeight, workLightIntensity, createMesh } = this
-    , ceilingGroup = new THREE.Group()
-    , ceiling = createMesh(
-      new THREE.CircleGeometry( 150, 64 ),
-      new THREE.MeshPhongMaterial({ 
-        color: 0xffffff, 
-        side: THREE.BackSide,
-        // transparent: true,
-        // opacity: 1
-      })
-    )
-
-    ceilingGroup.name = "Ceiling Group"
-    
-    // ceiling.visible = false
-    ceiling.name = "Ceiling"
-    ceilingGroup.add(ceiling)
-        
-    // Lights
-    const light1 = new THREE.PointLight( 0xffffff, workLightIntensity, 130)
-    light1.add( createMesh( 
-        new THREE.SphereBufferGeometry(2, 4, 2),
-        new THREE.MeshBasicMaterial({ 
-          transparent: true, opacity: 0, color: 0xffffff 
-        })
-        // new THREE.MeshPhongMaterial({ color: 0xffffff }) 
-      ) 
-    )
-    light1.castShadow = true
-
-    const light2 = light1.clone()
-    , light3 = light1.clone()
-    , light4 = light1.clone()
-
-    ceilingGroup.add(light1, light2, light3, light4)
-    this.workLightArr.push(light1, light2, light3, light4)
-    
-    light1.position.set(-75, -50, -10)
-    light2.position.set(-35, -120, -10)
-    light3.position.set(35, -120, -10)
-    light4.position.set(75, -50, -10)
-
-    // ceilingGroup.rotation.set(0, Math.PI, 0) // Normal
-    ceilingGroup.rotation.set(Math.PI/2, Math.PI, 0)  // As Ceiling
-    ceilingGroup.position.set(0, roomHeight, 0)
-
-    scene.add(ceilingGroup)
-  }
-  addWall() {
-    // Adding Wall
-    const { scene, roomHeight, wallBg, createMesh } = this
-    , wall1 = createMesh(
-      new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, 2 * Math.PI ),
-      new THREE.MeshPhongMaterial({ 
-        side: THREE.BackSide,
-        map: wallBg
-      }),
-      {
-        minFilter: THREE.LinearFilter,
-        wrapping: THREE.RepeatWrapping,
-        repeat: new THREE.Vector2(120, 15),
-      }
-    )
-        
-    wall1.position.set(0, roomHeight / 2, 0)
-    wall1.name = "Wall"
-    // wall1.receiveShadow = true
-    scene.add(wall1)
-  }
   introduce(obj){
     const { scene, workLightIntensity } = this, duration = 2
     scene.add(obj)
     // l(obj)
 
-    switch(obj.type){
-      case 'Mesh':
-        gsap.to(obj.material, { duration, opacity: 1 })
-        break;
+    // switch(obj.type){
+    //   case 'Mesh':
+    //     gsap.to(obj.material, { duration, opacity: 1 })
+    //     break;
 
-      case 'Group':
-        obj.traverse(child => {
+    //   case 'Group':
+    //     obj.traverse(child => {
 
-          switch(child.type){
-            case 'Mesh':
-              gsap.to(child.material, { duration, opacity: 1 })
-              break;
+    //       switch(child.type){
+    //         case 'Mesh':
+    //           gsap.to(child.material, { duration, opacity: 1 })
+    //           break;
             
-            case 'PointLight':
-              gsap.to(child, { duration, intensity: workLightIntensity })
-              break;
-          }
+    //         case 'PointLight':
+    //           gsap.to(child, { duration, intensity: workLightIntensity })
+    //           break;
+    //       }
 
-        })
-        break;
-    }
+    //     })
+    //     break;
+    // }
   }
   introduceCSS3D(obj){
     const { scene2 } = this, duration = 2
     scene2.add(obj)
     // l(obj)
-    gsap.to(obj.element, { duration, opacity: 1 })
+    // gsap.to(obj.element, { duration, opacity: 1 })
   }
-  addWorkObjectSequence(){
+  addObjects(){
     const { renderer, scene, createMesh } = this
-    , texLdr = new THREE.TextureLoader()     
+    , texLdr = new THREE.TextureLoader()    
+    , fbx = new FBXLoader()
+    , gltf = new GLTFLoader()  
+    , mtl = new MTLLoader()
+    , tds = new TDSLoader()
     , addFloor = () => {
       texLdr.load('assets/textures/floor.png', floorImg => {
         texLdr.load('assets/textures/floorBump.jpg', floorBump => {
@@ -424,8 +333,8 @@ export default class THREEStarter {
               map: floorImg, 
               bumpMap: floorBump, 
               bumpScale: .1,
-              transparent: true, 
-              opacity: 0
+              // transparent: true, 
+              // opacity: 0
             })
           )
     
@@ -444,7 +353,7 @@ export default class THREEStarter {
         new THREE.CircleGeometry( 150, 64 ),
         new THREE.MeshPhongMaterial({ 
           color: 0xffffff, side: THREE.BackSide,
-          transparent: true, opacity: 0
+          // transparent: true, opacity: 0
         })
       )
   
@@ -455,8 +364,8 @@ export default class THREEStarter {
       ceilingGroup.add(ceiling)
           
       // Lights
-      const light1 = new THREE.PointLight( 0xffffff, 0, 130)
-      // const light1 = new THREE.PointLight( 0xffffff, workLightIntensity, 130)
+      // const light1 = new THREE.PointLight( 0xffffff, 0, 130)
+      const light1 = new THREE.PointLight( 0xffffff, workLightIntensity, 130)
       // light1.add( createMesh( 
       //     new THREE.SphereBufferGeometry(2, 4, 2),
       //     new THREE.MeshBasicMaterial({ 
@@ -493,7 +402,7 @@ export default class THREEStarter {
           new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, 2 * Math.PI ),
           new THREE.MeshPhongMaterial({ 
             side: THREE.BackSide, map: wallBg, 
-            transparent: true, opacity: 0
+            // transparent: true, opacity: 0
           }),
           {
             minFilter: THREE.LinearFilter,
@@ -523,7 +432,7 @@ export default class THREEStarter {
         , extrudeSettings = { depth: 1, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 }
         , table = createMesh(
           new THREE.ExtrudeBufferGeometry( tableShape, extrudeSettings ),
-          new THREE.MeshPhongMaterial({ map: tableTex, transparent: true, opacity: 0 }),
+          new THREE.MeshPhongMaterial({ map: tableTex }),
           {
             minFilter: THREE.LinearFilter,
             wrapping: THREE.RepeatWrapping,
@@ -532,7 +441,7 @@ export default class THREEStarter {
         )
         , tableLeg1 = createMesh(
           new THREE.CylinderGeometry( 2, 1, 25, 64, 1, false, 0, 2 * Math.PI),
-          new THREE.MeshPhongMaterial({ color: 0x000000, transparent: true, opacity: 0 }),
+          new THREE.MeshPhongMaterial({ color: 0x000000 }),
         )
         
         tableGroup.name = "Table Group"
@@ -558,7 +467,6 @@ export default class THREEStarter {
 
         this.introduce(tableGroup)
       })
-
     }
     , addPosters = () => {
       const posters = [
@@ -578,7 +486,6 @@ export default class THREEStarter {
           image: 'assets/textures/poster4.jpg', name: 'poster4',
           pos: [60, 65, -133], rot: [0, -.3, 0], m: 1.2
         },
-        // { windowTex: 'assets/textures/window.jpg'},
       ]
   
       posters.forEach(currTex => {
@@ -589,9 +496,7 @@ export default class THREEStarter {
           // l(currTex, tex, idx)
           tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
           const posterMesh = createMesh(
-            geo, new THREE.MeshPhongMaterial({ 
-              map: tex, transparent: true, opacity: 0 
-            })
+            geo, new THREE.MeshPhongMaterial({ map: tex })
           )
           posterMesh.scale.set(1, tex.image.height / tex.image.width, 1)
           posterMesh.scale.multiplyScalar(m)
@@ -603,10 +508,7 @@ export default class THREEStarter {
       })
     }
     , addPC = () => {
-      const mtl = new MTLLoader()
-      , fbx = new FBXLoader()
-      , obj = new OBJLoader()
-      , gltf = new GLTFLoader()
+      const obj = new OBJLoader()
       , monitorGroup = new THREE.Group()
 
       monitorGroup.name = "Monitors"
@@ -675,7 +577,6 @@ export default class THREEStarter {
     }
     , addStationaryAndBeverage = () => {
       const snbGr = new THREE.Group()
-      , gltf = new GLTFLoader()
 
       snbGr.name = "Stationary & Beverage"
       snbGr.position.set(-30, 27.2, -110.18)
@@ -709,24 +610,54 @@ export default class THREEStarter {
       })
                         
     }
-    , addRouterAndPhone = () => {
-      router.name = "Wifi Router"
-      router.scale.multiplyScalar(.03)
-      router.rotation.set(0, Math.PI / 2 + .2, 0)
-      router.position.set(-36.54, 27.6, -120)
-      scene.add(router)
-      
-      phone.name = "Phone"
-      phone.rotation.set(0, Math.PI / 2 + .2, 0)
-      phone.position.set(-2, 27, -108)
-      phone.scale.multiplyScalar(.7)
-      scene.add(phone)
-
-      const screenPh = new CSS3DObject($("#phone")[0])
-      screenPh.rotation.set(-Math.PI/2, 0, 0 + .2)
-      screenPh.position.set(-2, 27.5, -108)
-      screenPh.scale.multiplyScalar(.7)
-      scene2.add(screenPh)
+    , addRouterPhoneAndStatue = () => {
+      gltf.load('assets/models/router/scene.gltf', obj => { 
+        const router = obj.scene 
+        router.name = "Wifi Router"
+        router.scale.multiplyScalar(.03)
+        router.rotation.set(0, Math.PI / 2 + .2, 0)
+        router.position.set(-36.54, 27.6, -120)
+        this.introduce(router)
+      })
+      gltf.load('assets/models/phone/scene.gltf', obj => { 
+        const phone = obj.scene 
+        phone.name = "Phone"
+        phone.rotation.set(0, Math.PI / 2 + .2, 0)
+        phone.position.set(-2, 27, -108)
+        phone.scale.multiplyScalar(.7)
+        this.introduce(phone)
+  
+        const screenPh = new CSS3DObject($("#phone")[0])
+        screenPh.rotation.set(-Math.PI/2, 0, 0 + .2)
+        screenPh.position.set(-2, 27.5, -108)
+        screenPh.scale.multiplyScalar(.7)
+        this.introduceCSS3D(screenPh)
+      })
+      mtl.load("assets/models/showpiece/12335_The_Thinker_v3_l2.mtl", materials => {
+        materials.preload()
+        new OBJLoader()
+        .setMaterials( materials )
+        .load( 'assets/models/showpiece/12335_The_Thinker_v3_l2.obj', object => {
+          const showpiece = object
+          showpiece.name = "Showpiece"
+          showpiece.scale.multiplyScalar(.04)
+          showpiece.rotation.set(-Math.PI / 2, 0, -.2)
+          showpiece.position.set(-55, 27, -117)
+          showpiece.children[0].material.color = new THREE.Color(0x962fda)
+          showpiece.children[0].material.needsUpdate = true
+          showpiece.children[0].castShadow = true
+          showpiece.children[1].material.color = new THREE.Color(0x962fda)
+          showpiece.children[1].material.needsUpdate = true
+          showpiece.children[1].castShadow = true
+    
+          this.introduce(showpiece)
+    
+          gsap.to(showpiece.rotation, { 
+            z: "+=" + 2 * Math.PI, repeat: -1,
+            duration: 20, ease: Linear.easeNone
+          })
+        })
+      })
     }
     , addClock = () => {
       const startTime = () => {
@@ -745,7 +676,7 @@ export default class THREEStarter {
       const timeDiv = new CSS3DObject($("#time")[0])
       timeDiv.rotation.set(0, .3, 0)
       timeDiv.position.set(-50, 28.5, -100)
-      scene2.add(timeDiv)
+      this.introduceCSS3D(timeDiv)
   
       const length = 16, width = 2  
       , extrudeSettings = {
@@ -768,12 +699,133 @@ export default class THREEStarter {
         new THREE.MeshPhongMaterial({ color: 0x000000 })
       )
       mesh.name = "Clock BG"
-      scene.add(mesh)
       mesh.rotation.set(0, .3, 0)
       mesh.position.set(-58.03, 28, -98.48)
+      this.introduce(mesh)
 
       startTime()
     }
+    , addDoorCouchAndAC = () => {
+      fbx.load('assets/models/door/Door_Component_BI3.fbx', group => { 
+        const door = group 
+        door.scale.multiplyScalar(.3)
+        door.position.set(-143, 0, -44)
+        door.rotation.set(0, 1.26, 0)
+        door.name = "Door"
+        this.introduce(door)
+      })
+      gltf.load('assets/models/ac/scene.gltf', obj => { 
+        const ac = obj.scene 
+        ac.name = "AC"
+        ac.traverse(child => child.isMesh && (child.castShadow = true))
+        ac.scale.multiplyScalar(2.42)
+        ac.position.set(-117.58, 72, -84.38)
+        ac.rotation.set(0, .92, 0)
+        this.introduce(ac)
+      }) 
+      tds.load('assets/models/sofa/the chair modeling.3ds', object => {
+        const couch = object
+        couch.rotation.set(-Math.PI / 2, 0, .88)
+        couch.scale.multiplyScalar(10)
+        couch.position.set(-105, 0, -79)
+
+        couch.traverse(child => {
+          if(child.isMesh){
+            if(['Cylinder', 'Cylinder.001', 'Cylinder.002', 'Cylinder.003'].includes(child.name))
+              child.material.color = new THREE.Color(0x5b1212)            
+            else child.material.color = new THREE.Color(0x000000)
+            child.material.shininess = 10
+          }
+        })
+        this.introduce(couch)
+      })
+    }
+    , addPlantsAndWindow = () => {
+      fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => { 
+        const plant1 = group.children[2] 
+        plant1.name = "Plant 1"
+        plant1.scale.multiplyScalar(.04)
+        plant1.position.set(-85.14, 0, -108)
+        plant1.rotation.set(-1.57, 0, 1.36)
+        plant1.castShadow = true
+        this.introduce(plant1)
+    
+        const plant2 = plant1.clone()
+        plant2.name = "Plant 2"    
+        plant2.position.set(84.10, 0, -108)
+        plant2.rotation.set(-1.57, 0, 2.74)
+        this.introduce(plant2)
+      })
+
+      const windowGroup = new THREE.Group()
+      windowGroup.name = "Window"
+      windowGroup.position.set(138, 35, -50)
+      windowGroup.rotation.set(0, -1.26, 0)
+      windowGroup.scale.multiplyScalar(1.25)
+      this.introduce(windowGroup)
+      
+      texLdr.load('assets/textures/window.jpg', windowTex => { 
+        const winBg = createMesh(
+          new THREE.PlaneGeometry(20, 20),
+          new THREE.MeshPhongMaterial({ map: windowTex })
+        )
+        winBg.scale.set(1.37, 1.03, 1.37)
+        winBg.position.set(0, 10.48, -1.12)
+        windowGroup.add(winBg)
+      })
+      gltf.load('assets/models/window/scene.gltf', sc => { 
+        const window = sc.scene 
+        window.children[0].children[0].children[0].children[0].visible = false
+        window.children[0].children[0].children[0].children[2].position.set(33.86, .98, 38.59)
+        window.scale.set(.31, .26, .25)
+        windowGroup.add(window)
+      })
+    }    
+    , addChairAndGuitar = () => {
+      tds.load('assets/models/chair/armchair_BLEND.3ds', object => {
+        const chair = object
+        chair.rotation.set(-Math.PI / 2, 0, -3)
+        chair.scale.multiplyScalar(7)
+        chair.scale.z = 7.5
+        chair.position.set(45, 11.75, -78)
+        // l(chair)
+        chair.traverse(child => {
+          if(child.isMesh){
+            child.material.color = new THREE.Color(0x000000)
+            child.material.emissive = new THREE.Color(0x000000)
+            child.material.shininess = 5
+          }
+        })
+        this.introduce(chair)
+      })
+      mtl.load("assets/models/guitar/Miramondo_Hot_Shot_Stool.mtl", materials => {
+        materials.preload()
+        new OBJLoader()
+        .setMaterials( materials )
+        .load( 'assets/models/guitar/Miramondo_Hot_Shot_Stool.obj', object => {
+          const stool = object
+          stool.name = "Stool"
+          stool.scale.multiplyScalar(.2)
+          stool.rotation.set(-Math.PI / 2, 0, -Math.PI / 2)
+          stool.position.set(120, 0, -70)
+          this.introduce(stool)
+        })
+      })
+      mtl.load("assets/models/guitar/10367_AcousticGuitar_v01_it2.mtl", materials => {
+        materials.preload()
+        new OBJLoader()
+        .setMaterials( materials )
+        .load( 'assets/models/guitar/10367_AcousticGuitar_v01_it2.obj', object => {
+          const guitar = object
+          guitar.name = "Guitar"
+          guitar.scale.multiplyScalar(.035)
+          guitar.rotation.set(-1.7, .1, 2)
+          guitar.position.set(110, 0, -85)
+          this.introduce(guitar)
+        })
+      })
+    }
+
     (() => {
       // Adding Floor
       addFloor()
@@ -789,482 +841,16 @@ export default class THREEStarter {
       addPC()       
       // Adding Notepad, Pen Stand, Coffee
       addStationaryAndBeverage()
-      // // Adding Router, Mobile
-      // addRouterAndPhone()
-      // // Adding Clock
-      // addClock()
-
-      // // Adding Door, AC
-      // addDoorAndAC()
-      // // Adding Plants, Window
-      // addPlantsAndWindow()
-      // // Adding Chair, Guitar
-      // addChairAndGuitar()
-      // // Adding Couch
-      // addCouchAndShowpiece()
-    })()
-  }
-  addWorkObjects(){
-    const { 
-      scene, scene2, door, ac, plant1, window,
-      poster1, poster2, poster3, poster4, couch, showpiece,
-      monitorPr, monitorSc, cpu, km, chair, stool,
-      notepad, penstand, coffee, router, phone,
-      guitar, tableTex, windowTex, createMesh 
-    } = this
-    , addTable = () => {
-      let tableGroup = new THREE.Group()
-      , st = -2
-      , tableShape = new THREE.Shape()
-        .absarc( 65, 110, 20, st, st + Math.PI, false )
-        .lineTo( 0, 148 )
-        .lineTo( -72, 129 )
-        .moveTo( -72, 129 )
-        .absarc( -65, 110, 20, -1 * st, -1 * (st + Math.PI), false )
-        .lineTo( -35, 100 )
-        .lineTo( 35, 100 )
-      , extrudeSettings = { depth: 1, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 }
-      , table = createMesh(
-        new THREE.ExtrudeBufferGeometry( tableShape, extrudeSettings ),
-        new THREE.MeshPhongMaterial({ 
-          // color: 0x008080,
-          map: tableTex, 
-        }),
-        {
-          minFilter: THREE.LinearFilter,
-          wrapping: THREE.RepeatWrapping,
-          repeat: new THREE.Vector2(.04, .04), 
-        }
-      )
-      , tableLeg1 = createMesh(
-        new THREE.CylinderGeometry( 2, 1, 25, 64, 1, false, 0, 2 * Math.PI),
-        new THREE.MeshPhongMaterial({ color: 0x000000 }),
-      )
-      
-      tableGroup.name = "Table Group"
-      scene.add(tableGroup)
-      
-      table.name = "Table"
-      table.position.set( 0, 25, 0 )
-      table.rotation.set( -Math.PI/2, 0 ,0 )
-      table.castShadow = true
-      // table.receiveShadow = true
-      
-      tableLeg1.castShadow = true
-      let tableLeg2 = tableLeg1.clone()
-      , tableLeg3 = tableLeg1.clone()
-      , tableLeg4 = tableLeg1.clone()
-      
-      tableLeg1.position.set( 60, 25 / 2, -95 )
-      tableLeg2.position.set( -60, 25 / 2, -95 )
-      tableLeg3.position.set( -70, 25 / 2, -125 )
-      tableLeg4.position.set( 70, 25 / 2, -125 )
-  
-      tableGroup.add(table, tableLeg1, tableLeg2, tableLeg3, tableLeg4)
-      tableGroup.scale.set(.85, 1, .9)
-      tableGroup.position.set( 0, 0, -10 )
-    }
-    , addPosters = () => {
-      const poster1Mesh = createMesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshPhongMaterial({ map: poster1 })
-      )
-      poster1Mesh.scale.set(1, poster1.image.height / poster1.image.width, 1)
-      poster1Mesh.position.set(-55, 50 + 10, -137)
-      poster1Mesh.rotation.set(0, .25, 0)
-      poster1Mesh.name = "poster1"
-      
-      const poster2Mesh = createMesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshPhongMaterial({ map: poster2 })
-      )
-      poster2Mesh.scale.set(1, poster2.image.height / poster2.image.width, 1)
-      poster2Mesh.scale.multiplyScalar(1.2)
-      poster2Mesh.position.set(-24, 52 + 10, -145)
-      poster2Mesh.rotation.set(0, .1, 0)
-      poster2Mesh.name = "poster2"
-  
-      const poster3Mesh = createMesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshPhongMaterial({ shininess: 50, map: poster3 })
-      )
-      poster3Mesh.scale.set(1, poster3.image.height / poster3.image.width, 1)
-      poster3Mesh.scale.multiplyScalar(2)
-      poster3Mesh.position.set(20, 55 + 10, -143)
-      poster3Mesh.rotation.set(0, -.15, 0)
-      poster3Mesh.name = "poster3"
-  
-      const poster4Mesh = createMesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshPhongMaterial({ map: poster4 })
-      )
-      poster4Mesh.scale.set(1, poster4.image.height / poster4.image.width, 1)
-      poster4Mesh.scale.multiplyScalar(1.2)
-      poster4Mesh.position.set(60, 55 + 10, -133)
-      poster4Mesh.rotation.set(0, -.3, 0)
-      poster4Mesh.name = "poster4"
-  
-      scene.add(poster1Mesh, poster2Mesh, poster3Mesh, poster4Mesh)
-    }
-    , addClock = () => {
-      const startTime = () => {
-        const today = new Date()
-        , wd = today.toLocaleDateString("en-US", { weekday: 'short' })
-        , h = today.getHours()
-        , m = checkTime(today.getMinutes())
-        , s = checkTime(today.getSeconds())
-        
-        $("#time").html(`${wd} ${h}:${m}:${s}`)
-        
-        setTimeout(startTime, 1000)
-      }
-      , checkTime = i => i < 10 ? `0${i}` : i
-    
-      const timeDiv = new CSS3DObject($("#time")[0])
-      timeDiv.rotation.set(0, .3, 0)
-      timeDiv.position.set(-50, 28.5, -100)
-      scene2.add(timeDiv)
-  
-      const length = 16, width = 2  
-      , extrudeSettings = {
-        steps: 1,
-        depth: 0,
-        bevelEnabled: true,
-        bevelThickness: 1,
-        bevelSize: 1,
-        bevelOffset: 0,
-        bevelSegments: 4
-      }
-      , shape = new THREE.Shape()
-      .moveTo(0,0)
-      .lineTo(0, width)
-      .lineTo(length, width)
-      .lineTo(length, 0)
-      .lineTo(0, 0)
-      , mesh = createMesh(
-        new THREE.ExtrudeBufferGeometry( shape, extrudeSettings ),
-        new THREE.MeshPhongMaterial({ color: 0x000000 })
-      )
-      mesh.name = "Clock BG"
-      scene.add(mesh)
-      mesh.rotation.set(0, .3, 0)
-      mesh.position.set(-58.03, 28, -98.48)
-
-      startTime()
-    }
-    , addPC = () => {
-      // Monitors
-      const monitorGroup = new THREE.Group()
-      scene.add(monitorGroup)
-
-      monitorGroup.name = "Monitors"
-      monitorPr.name = "Primary"
-      monitorPr.position.set(-4.5, 0, 0)
-      monitorPr.rotation.set(0, -Math.PI / 2, 0)
-      // monitorPr.castShadow = true
-      monitorGroup.add(monitorPr)
-      
-      const rot = .35, monX = 24, monY = -.2, monZ = 12
-      monitorSc.name = "Secondary 1"
-      monitorSc.scale.multiplyScalar(.06)
-      monitorSc.position.set(-monX, monY, monZ)
-      monitorSc.rotation.set(0, -Math.PI / 2 + rot, 0)
-      monitorGroup.add(monitorSc)
-
-      const monitorSc2 = monitorSc.clone()
-      monitorSc2.name = "Secondary 2"
-      monitorSc2.position.set(monX, monY, monZ)
-      monitorSc2.rotation.set(0, -Math.PI / 2 - rot, 0)
-      monitorGroup.add(monitorSc2)
-
-      monitorGroup.rotation.set(0, -.08, 0)
-      monitorGroup.position.set(15, 36, -130)
-
-      const screenPr = new CSS3DObject($("#monitorPr")[0])
-      screenPr.position.set(14.25, 37, -122)
-      screenPr.rotation.set(0, -.08, 0)
-      scene2.add(screenPr)
-      
-      const screenSc1 = new CSS3DObject($("#monitorSc1")[0])
-      screenSc1.position.set(-10, 36, -119)
-      screenSc1.rotation.set(0, .27, 0)
-      scene2.add(screenSc1)
-
-      const screenSc2 = new CSS3DObject($("#monitorSc2")[0])
-      screenSc2.position.set(37.5, 36, -115.5)
-      screenSc2.rotation.set(0, -.42, 0)
-      scene2.add(screenSc2)
-
-      cpu.name = "CPU"
-      cpu.position.set(55, 27, -105)
-      cpu.rotation.set(0, -2, 0)
-      cpu.scale.multiplyScalar(4.5)
-      scene.add(cpu)
-
-      km.name = "Keyboard, Mouse"
-      km.scale.multiplyScalar(1.9)
-      km.position.set(13, 32.8, -102.92)
-      km.rotation.set(0, -.08, 0)
-      scene.add(km)
-    }
-    , addStationaryAndBeverage = () => {
-      const snbGr = new THREE.Group()
-      snbGr.name = "Stationary & Beverage"
-      scene.add(snbGr)
-
-      notepad.name = "NotePad"
-      notepad.scale.multiplyScalar(25)
-      snbGr.add(notepad)
-            
-      penstand.name = "Pen Stand"
-      penstand.position.set(14, -35.8, -5)
-      penstand.scale.multiplyScalar(1.68)
-      snbGr.add(penstand)
-      
-      coffee.name = "Coffee"
-      coffee.position.set(0, -19, 7)
-      coffee.scale.multiplyScalar(.75)
-      snbGr.add(coffee)
-
-      snbGr.position.set(-30, 27.2, -110.18)
-      snbGr.rotation.set(0, .32, 0)
-      
-      // const smoke = new CSS3DSprite($("#smoke")[0])
-      const smoke = new CSS3DObject($("#smoke")[0])
-      smoke.position.set(-24, 38, -111.5)
-      scene2.add(smoke)
-    }
-    , addRouterAndPhone = () => {
-      router.name = "Wifi Router"
-      router.scale.multiplyScalar(.03)
-      router.rotation.set(0, Math.PI / 2 + .2, 0)
-      router.position.set(-36.54, 27.6, -120)
-      scene.add(router)
-      
-      phone.name = "Phone"
-      phone.rotation.set(0, Math.PI / 2 + .2, 0)
-      phone.position.set(-2, 27, -108)
-      phone.scale.multiplyScalar(.7)
-      scene.add(phone)
-
-      const screenPh = new CSS3DObject($("#phone")[0])
-      screenPh.rotation.set(-Math.PI/2, 0, 0 + .2)
-      screenPh.position.set(-2, 27.5, -108)
-      screenPh.scale.multiplyScalar(.7)
-      scene2.add(screenPh)
-    }
-    , addDoorAndAC = () => {
-      door.scale.multiplyScalar(.3)
-      door.position.set(-143, 0, -44)
-      door.rotation.set(0, 1.26, 0)
-      door.name = "Door"
-      scene.add(door)
-      
-      ac.name = "AC"
-      ac.traverse(child => child.isMesh && (child.castShadow = true))
-      ac.scale.multiplyScalar(2.42)
-      ac.position.set(-117.58, 72, -84.38)
-      ac.rotation.set(0, .92, 0)
-      scene.add(ac)
-    }
-    , addPlantsAndWindow = () => {
-      plant1.name = "Plant 1"
-      plant1.scale.multiplyScalar(.04)
-      plant1.position.set(-85.14, 0, -108)
-      plant1.rotation.set(-1.57, 0, 1.36)
-      plant1.castShadow = true
-      scene.add(plant1)
-  
-      const plant2 = plant1.clone()
-      plant2.name = "Plant 2"    
-      plant2.position.set(84.10, 0, -108)
-      plant2.rotation.set(-1.57, 0, 2.74)
-      scene.add(plant2)
-
-      const windowGroup = new THREE.Group()
-      windowGroup.name = "Window"
-      scene.add(windowGroup)
-      
-      window.children[0].children[0].children[0].children[0].visible = false
-      window.children[0].children[0].children[0].children[2].position.set(33.86, .98, 38.59)
-      window.scale.set(.31, .26, .25)
-      
-      const winBg = createMesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshPhongMaterial({ map: windowTex })
-      )
-      winBg.scale.set(1.37, 1.03, 1.37)
-      winBg.position.set(0, 10.48, -1.12)
-
-      windowGroup.add(window, winBg)
-
-      windowGroup.position.set(138, 35, -50)
-      windowGroup.rotation.set(0, -1.26, 0)
-      windowGroup.scale.multiplyScalar(1.25)      
-    }
-    , addChairAndGuitar = () => {
-      chair.name = "Chair"
-      chair.scale.multiplyScalar(30)
-      chair.rotation.set(0, 2.9, 0)
-      chair.position.set(46, 0, -95)
-      chair.traverse(child => child.isMesh && (child.castShadow = true))
-      scene.add(chair)
-      
-      guitar.name = "Guitar"
-      guitar.scale.multiplyScalar(.035)
-      guitar.rotation.set(-1.7, .1, 2)
-      guitar.position.set(110, 0, -85)
-      guitar.castShadow = true
-      scene.add(guitar)
-
-      stool.name = "Stool"
-      stool.scale.multiplyScalar(.2)
-      stool.rotation.set(-Math.PI / 2, 0, -Math.PI / 2)
-      stool.position.set(120, 0, -70)
-      stool.traverse(child => child.isMesh && (child.castShadow = true))
-      scene.add(stool)
-    }
-    , addCouchAndShowpiece = () => {
-      couch.name = "Couch"
-      couch.scale.set(.02, .04, .04)
-      couch.rotation.set(-Math.PI / 2, 0, .88)
-      couch.position.set(-105, 0, -79)
-      couch.castShadow = true
-      scene.add(couch)
-      
-      showpiece.name = "Showpiece"
-      showpiece.scale.multiplyScalar(.04)
-      showpiece.rotation.set(-Math.PI / 2, 0, -.2)
-      showpiece.position.set(-55, 27, -117)
-      showpiece.children[0].material.color = new THREE.Color(0x962fda)
-      showpiece.children[0].material.needsUpdate = true
-      showpiece.children[0].castShadow = true
-      showpiece.children[1].material.color = new THREE.Color(0x962fda)
-      showpiece.children[1].material.needsUpdate = true
-      showpiece.children[1].castShadow = true
-
-      scene.add(showpiece)
-
-      gsap.to(showpiece.rotation, 20, { 
-        z: "+=" + 2 * Math.PI, repeat: -1,
-        ease: Linear.easeNone
-      })
-    }
-    
-    (() => {
-      // Adding Table, Table legs
-      addTable()    
-      // Adding Posters
-      addPosters()
-      // Adding PC
-      addPC()
-      // Adding Notepad, Pen Stand, Coffee
-      addStationaryAndBeverage()
-      // Adding Router, Mobile
-      addRouterAndPhone()
+      // Adding Router, Mobile, Statue
+      addRouterPhoneAndStatue()
       // Adding Clock
       addClock()
       // Adding Door, AC
-      addDoorAndAC()
+      addDoorCouchAndAC()
       // Adding Plants, Window
       addPlantsAndWindow()
       // Adding Chair, Guitar
       addChairAndGuitar()
-      // Adding Couch
-      addCouchAndShowpiece()
     })()
-  }
-  preload() {
-    const { renderer, loader } = this
-    , { manager, texture, fbx, gltf, mtl } = loader
-    , texArr = [
-      { floorImg: 'assets/textures/floor.png'},
-      { floorBump: 'assets/textures/floorBump.jpg'},
-      { wallBg: 'assets/textures/wall.png'},
-      { tableTex: 'assets/textures/table.jpg'},
-      { poster1: 'assets/textures/poster1.jpg'},
-      { poster2: 'assets/textures/poster2.jpg'},
-      { poster3: 'assets/textures/poster3.jpg'},
-      { poster4: 'assets/textures/poster4.jpg'},
-      { windowTex: 'assets/textures/window.jpg'},
-    ]
-
-    manager.onStart = () => {
-      l("Loading Started")
-    }
-  
-    manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-      let perc = Math.round(itemsLoaded / itemsTotal * 100) + '%'
-      // l(url, perc)
-    }
-  
-    manager.onError = url => {
-      l('There was an error loading ' + url)
-    }
-  
-    manager.onLoad = () => {
-      l('Loading complete!')
-      this.addObjects()
-    }
-
-    texArr.forEach(currtex => {
-      let key = Object.keys(currtex)[0]
-      , val = Object.values(currtex)[0]
-
-      texture.load(val, tex => { 
-        tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
-        this[key] = tex
-      })
-    })
-
-    mtl.load("assets/models/pc/Monitor 27' Curved.mtl", materials => {
-      materials.preload()
-      new OBJLoader()
-      .setMaterials( materials )
-      .load( 'assets/models/pc/Monitor-Curved.obj', object => {
-        this.monitorPr = object
-      })
-    })
-    mtl.load("assets/models/guitar/Miramondo_Hot_Shot_Stool.mtl", materials => {
-      materials.preload()
-      new OBJLoader()
-      .setMaterials( materials )
-      .load( 'assets/models/guitar/Miramondo_Hot_Shot_Stool.obj', object => {
-        this.stool = object
-      })
-    })
-    mtl.load("assets/models/guitar/10367_AcousticGuitar_v01_it2.mtl", materials => {
-      materials.preload()
-      new OBJLoader()
-      .setMaterials( materials )
-      .load( 'assets/models/guitar/10367_AcousticGuitar_v01_it2.obj', object => {
-        this.guitar = object
-      })
-    })
-    mtl.load("assets/models/showpiece/12335_The_Thinker_v3_l2.mtl", materials => {
-      materials.preload()
-      new OBJLoader()
-      .setMaterials( materials )
-      .load( 'assets/models/showpiece/12335_The_Thinker_v3_l2.obj', object => {
-        this.showpiece = object
-      })
-    })
-
-   
-    fbx.load('assets/models/door/Door_Component_BI3.fbx', group => { this.door = group })
-    fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => { this.plant1 = group.children[2] })
-    fbx.load('assets/models/pc/PcMonitor.fbx', group => { this.monitorSc = group })        
-    fbx.load('assets/models/sofa/artefly_set.fbx', group => { this.couch = group.children[1] })        
-    
-    gltf.load('assets/models/window/scene.gltf', sc => { this.window = sc.scene })
-    gltf.load('assets/models/ac/scene.gltf', obj => { this.ac = obj.scene })
-    gltf.load('assets/models/pc/cpu_1/scene.gltf', obj => { this.cpu = obj.scene })
-    gltf.load('assets/models/pc/km/scene.gltf', obj => { this.km = obj.scene })
-    gltf.load('assets/models/notepad/scene.gltf', obj => { this.notepad = obj.scene })
-    gltf.load('assets/models/penstand/scene.gltf', obj => { this.penstand = obj.scene })
-    gltf.load('assets/models/coffee/scene.gltf', obj => { this.coffee = obj.scene })
-    gltf.load('assets/models/router/scene.gltf', obj => { this.router = obj.scene })
-    gltf.load('assets/models/phone/scene.gltf', obj => { this.phone = obj.scene })
-    gltf.load('assets/models/chair/scene.gltf', obj => { this.chair = obj.scene })
   }
 }
