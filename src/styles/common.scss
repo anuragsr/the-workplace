@@ -5,7 +5,6 @@ html, body, #three-ctn{
 
 body {
   font-family: 'Courier New', Courier, monospace;
-  background: rgb(36, 41, 46);
   text-align: center;
   color: $w;
 }
@@ -13,7 +12,8 @@ body {
 .canvas-webGL{ @include pa(0, 0); }
 .canvas-css3D{ @include pa(0, 0); }
 .css3d{ 
-  @include pa(0, 0); 
+  @include pa(0, 0);
+  opacity: 0;
   &.lights-off{ opacity: .2; }
   &#smoke{ 
     height: 7px; width: 10px; 

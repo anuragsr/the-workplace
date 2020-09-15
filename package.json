@@ -24,6 +24,7 @@
         "dat.gui": "^0.7.6",
         "gsap": "^3.2.2",
         "jquery": "^3.4.1",
+        "jquery.waitforimages": "^2.4.0",
         "normalize.css": "^8.0.0",
         "stats.js": "^0.17.0",
         "three": "^0.113.2"

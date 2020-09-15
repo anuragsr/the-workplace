@@ -12,6 +12,6 @@ $(() => {
   setTimeout(() => {
     const scene = new THREEStarter({ ctn: $("#three-ctn") })
     scene.init()
-    gsap.to("#three-ctn", .5, { delay:1, opacity: 1 })
+    // gsap.to("#three-ctn", .5, { delay:1, opacity: 1 })
   }, 50)
 })
