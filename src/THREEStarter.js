@@ -10,13 +10,21 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader'
 
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js'
+import {BloomPass} from 'three/examples/jsm/postprocessing/BloomPass.js'
+import {FilmPass} from 'three/examples/jsm/postprocessing/FilmPass.js'
+
 import gsap, { Linear } from 'gsap'
 import Stats from 'stats.js'
 
-import GUI from './utils/gui'
+import ImplGUI from './utils/gui'
+import * as dat from 'dat.gui'
+
 import THREELoader from './utils/loaders'
 import { l, cl } from './utils/helpers'
 // cl(); l(THREE)
+let then = 0;
 
 export default class THREEStarter {
   constructor(opts) {
@@ -33,8 +41,13 @@ export default class THREEStarter {
     this.scene2 = new THREE.Scene()
 
     this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
+    
     this.roomCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
     this.roomCameraHelper = new THREE.CameraHelper(this.roomCamera)
+
+    this.actionCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000)
+    this.actionCamera.name = "Action Camera"
+    this.actionCameraHelper = new THREE.CameraHelper(this.actionCamera)
 
     this.origin = new THREE.Vector3(0, 0, 0)
     // this.cameraStartPos = new THREE.Vector3(0, 150, 200)
@@ -69,16 +82,12 @@ export default class THREEStarter {
     this.currentCamera = this.camera
     
     this.stats = new Stats()
-    this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(this.stats.dom)
 
     // Store work lights
     this.workLightArr = []
     this.workLightIntensity = 2
-    this.roomHeight = 100
-
-    this.raycaster = new THREE.Raycaster()
-    this.mouse = new THREE.Vector2()
+    this.roomHeight = 100    
 
     // this.enableInspector()
   }
@@ -91,8 +100,8 @@ export default class THREEStarter {
     // Initialize the scene
     this.initScene()
     this.initGUI()
-    this.toggleHelpers(1)
     this.addListeners()
+    this.postProcess()
     // this.preload()
 
     $('body').waitForImages(() => {
@@ -107,10 +116,10 @@ export default class THREEStarter {
   initScene(){
     const { 
       ctn, w, h, camera, scene, 
-      renderer, renderer2, roomCamera, 
-      cameraStartPos, origin, plane, roomControls,
+      renderer, renderer2, roomCamera, actionCamera,
+      cameraStartPos, origin, roomControls, stats,
       spotLightMesh1, spotLight1, lightPos1,
-      spotLightMesh2, spotLight2, lightPos2
+      spotLightMesh2, spotLight2, lightPos2,       
     } = this
 
     // Renderer settings
@@ -133,6 +142,11 @@ export default class THREEStarter {
     scene.add(roomCamera)
     scene.add(roomControls.getObject())
 
+    actionCamera.position.copy(origin)
+    actionCamera.position.y = 2000
+    actionCamera.rotation.x = -Math.PI / 2
+    scene.add(actionCamera)
+
     scene.add(new THREE.AmbientLight(0xffffff, .2))
 
     // Spotlight and representational mesh
@@ -143,19 +157,39 @@ export default class THREEStarter {
     spotLightMesh2.position.copy(lightPos2)
     spotLight2.position.copy(lightPos2)
     // scene.add(spotLight2)
+
+    this.toggleHelpers(!1)
+    stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+
   }
   initGUI() {
-    const guiObj = new GUI()
+    const guiObj = new ImplGUI()
     , gui = guiObj.gui
     , params = guiObj.getParams()
     , he = gui.add(params, 'helpers')
     , defaultCam = gui.add(params, 'defaultCam')
     , roomCam = gui.add(params, 'roomCam')
+    , actionCam = gui.add(params, 'actionCam')
     , workLights = gui.add(params, 'workLights')
 
     he.onChange(value => this.toggleHelpers(value))
-    defaultCam.onChange(() => { this.roomControls.unlock() })
+    defaultCam.onChange(() => { 
+      this.roomControls.unlock() 
+      this.currentCamera = this.camera
+    })
     roomCam.onChange(() => { this.roomControls.lock() })
+    actionCam.onChange(() => {
+      this.currentCamera = this.actionCamera 
+      // this.currentCamera.position.y = 500
+      // setTimeout(() => {
+      //   this.composer.renderToScreen = false;        
+      // }, 1000);
+      gsap.fromTo(this.currentCamera.position, 
+        { y: 1000 }, 
+        { duration: 30, y: 500 }
+      )
+    })
+
     workLights.onChange(value => {
       if(!value){
         this.workLightArr.reverse().forEach((lt, idx) => {
@@ -174,40 +208,48 @@ export default class THREEStarter {
     })
 
     gui.add(params, 'getState')
-    // gui.add(params, 'message')
   }
   toggleHelpers(val) {
     const {
-      scene, gridHelper, axesHelper, 
+      scene, gridHelper, axesHelper, actionCameraHelper,
       roomCameraHelper, spotLightMesh1, spotLightMesh2
     } = this
     if(val){
       scene.add(gridHelper)
       scene.add(axesHelper)
       // scene.add(roomCameraHelper)
+      scene.add(actionCameraHelper)
       // scene.add(spotLightMesh1)
       // scene.add(spotLightMesh2)
     } else{
       scene.remove(gridHelper)
       scene.remove(axesHelper)
       // scene.remove(roomCameraHelper)
+      scene.remove(actionCameraHelper)
       // scene.remove(spotLightMesh1)
       // scene.remove(spotLightMesh2)
     }
   }
-  render() {
+  render(now) {
     const { 
       renderer, renderer2,
       stats, scene, scene2,
-      currentCamera 
+      currentCamera, composer 
     } = this
 
     try{
       stats.begin()
       // monitored code goes here
       
-      renderer.render(scene, currentCamera)
-      renderer2.render(scene2, currentCamera )
+      now *= 0.001;  // convert to seconds
+      const deltaTime = now - then;
+      then = now;
+      if(currentCamera.name === "Action Camera"){
+        composer.render(deltaTime)
+      } else{
+        renderer.render(scene, currentCamera)
+        renderer2.render(scene2, currentCamera )
+      }
 
       stats.end()
     } catch (err){
@@ -217,7 +259,7 @@ export default class THREEStarter {
   }
   resize() {
     let {
-      w, h, ctn, camera, 
+      w, h, ctn, camera, actionCamera,
       roomCamera, renderer, renderer2
     } = this
     
@@ -228,6 +270,9 @@ export default class THREEStarter {
   
     roomCamera.aspect = w / h
     roomCamera.updateProjectionMatrix()
+
+    actionCamera.aspect = w / h
+    actionCamera.updateProjectionMatrix()
   
     renderer.setSize(w, h)
     renderer2.setSize(w, h)
@@ -852,5 +897,47 @@ export default class THREEStarter {
       // Adding Chair, Guitar
       addChairAndGuitar()
     })()
+  }
+  postProcess(){
+    const {
+      renderer, scene, actionCamera
+    } = this
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, actionCamera));
+
+    const bloomPass = new BloomPass(
+        1,    // strength
+        25,   // kernel size
+        4,    // sigma ?
+        256,  // blur render target resolution
+    );
+    composer.addPass(bloomPass);
+
+    const filmPass = new FilmPass(
+        0,   // noise intensity
+        0,  // scanline intensity
+        0,    // scanline count
+        false,  // grayscale
+    );
+    filmPass.renderToScreen = true;
+    composer.addPass(filmPass);
+
+    this.composer = composer
+    window.composer = composer
+    
+    const gui = new dat.GUI();
+    {
+      const folder = gui.addFolder('BloomPass');
+      folder.add(bloomPass.copyUniforms.opacity, 'value', 0, 2).name('strength');
+      folder.open();
+    }
+    {
+      const folder = gui.addFolder('FilmPass');
+      folder.add(filmPass.uniforms.grayscale, 'value').name('grayscale');
+      folder.add(filmPass.uniforms.nIntensity, 'value', 0, 1).name('noise intensity');
+      folder.add(filmPass.uniforms.sIntensity, 'value', 0, 1).name('scanline intensity');
+      folder.add(filmPass.uniforms.sCount, 'value', 0, 1000).name('scanline count');
+      folder.open();
+    }
   }
 }

@@ -24,7 +24,7 @@ body {
   @include pa(0, 0);
   // opacity: 0;
   &.lights-off{ opacity: .2; }
-  &#smoke{ 
+  &#smoke{
     height: 7px; width: 10px; 
     img{ @extend %fhw; opacity: .7; } 
   }
