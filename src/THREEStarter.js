@@ -24,7 +24,7 @@ import * as dat from 'dat.gui'
 import THREELoader from './utils/loaders'
 import { l, cl } from './utils/helpers'
 // cl(); l(THREE)
-let then = 0;
+let then = 0, count = 0;
 
 export default class THREEStarter {
   constructor(opts) {
@@ -104,7 +104,7 @@ export default class THREEStarter {
   init() {
     // Initialize the scene
     this.initScene()
-    this.initGUI()
+    // this.initGUI()
     this.addListeners()
     this.postProcess()
 
@@ -137,7 +137,10 @@ export default class THREEStarter {
   
         this.introduce(floor)
         this.addObjects()
-        gsap.fromTo(this.currentCamera.position, 
+        const tl3D = new gsap.timeline()
+        const tlCSS = new gsap.timeline()
+
+        tl3D.fromTo(this.currentCamera.position, 
           { y: 800 }, 
           { 
             duration: 15, y: 500,
@@ -149,12 +152,17 @@ export default class THREEStarter {
             }
           }
         )
-        gsap.fromTo("#ctn-bg", 
+
+        tlCSS
+        .fromTo("#ctn-bg", 
           { scale: 1 }, 
-          { 
-            duration: 15, scale: 1.15
-          }
-        )
+          { duration: 15, scale: 1.15}
+        , "lb0")        
+        .to(".content .item", { 
+          duration: 2.5, opacity: 1, stagger: 5
+        }, "lb0")
+
+        tlCSS.seek(tlCSS.duration())
       })
     })
   }
@@ -234,23 +242,23 @@ export default class THREEStarter {
       // setTimeout(() => {
       //   this.composer.renderToScreen = false;        
       // }, 1000);
-      gsap.fromTo(this.currentCamera.position, 
-        { y: 1000 }, 
-        { 
-          duration: 5, y: 500,
-          onComplete: () => {
-            l("Bring scene into focus now!")
-            // $(".css3d").removeClass("loading")
-            // this.currentCamera = this.tempCamera
-          }
-        }
-      )
-      gsap.fromTo("#ctn-bg", 
-        { scale: 1 }, 
-        { 
-          duration: 5, scale: 1.15
-        }
-      )
+      // gsap.fromTo(this.currentCamera.position, 
+      //   { y: 1000 }, 
+      //   { 
+      //     duration: 5, y: 500,
+      //     onComplete: () => {
+      //       l("Bring scene into focus now!")
+      //       // $(".css3d").removeClass("loading")
+      //       // this.currentCamera = this.tempCamera
+      //     }
+      //   }
+      // )
+      // gsap.fromTo("#ctn-bg", 
+      //   { scale: 1 }, 
+      //   { 
+      //     duration: 5, scale: 1.15
+      //   }
+      // )
     })
 
     workLights.onChange(value => {
@@ -401,6 +409,9 @@ export default class THREEStarter {
   introduce(obj){
     const { scene, workLightIntensity } = this, duration = 2
     scene.add(obj)
+    count++
+    l(`${count} of 25 items added : ${obj.name}`)
+    count === 25 && l("All items added!")
     // l(obj)
 
     // switch(obj.type){
@@ -817,6 +828,7 @@ export default class THREEStarter {
       }) 
       tds.load('assets/models/sofa/the chair modeling.3ds', object => {
         const couch = object
+        couch.name = "Couch"
         couch.rotation.set(-Math.PI / 2, 0, .88)
         couch.scale.multiplyScalar(10)
         couch.position.set(-105, 0, -79)
@@ -878,6 +890,7 @@ export default class THREEStarter {
     , addChairAndGuitar = () => {
       tds.load('assets/models/chair/armchair_BLEND.3ds', object => {
         const chair = object
+        chair.name = "Chair"
         chair.rotation.set(-Math.PI / 2, 0, -3)
         chair.scale.multiplyScalar(7)
         chair.scale.z = 7.5

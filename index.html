@@ -22,7 +22,7 @@
       }
       #ctn-css3D{ display: none; }
       /* #ctn-loader{ display: flex; align-items: center; justify-content: center; } */
-      #ctn-loader .load{ opacity: 0; }
+      #ctn-loader .load, #ctn-loader .item{ opacity: 0; }
     </style>
   </head>
   <body class="noselect">
@@ -36,13 +36,29 @@
       <img class="css3d loading" id="phone" src="assets/textures/phone.gif" alt=""/>
       <div class="css3d loading" id="time">Sat 11:45:07</div>
     </div>
-    <div id="ctn-loader">
-      <img class="load" src="assets/Blocks-1s-200px.gif" alt="">
+    <div id="ctn-loader">      
+      <div class="load">
+        <img src="assets/Blocks-1s-200px.gif" alt="">
+        <span>Loading, please wait...</span>
+      </div>
       <div class="content">
-        <h1>The Workplace</h1>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipiscing elit, ultricies sociosqu semper pellentesque arcu aliquam. Habitasse porta tristique ligula duis tempor nam ultricies sagittis, dui montes imperdiet ante pharetra semper amet fermentum, placerat mauris maecenas ultrices curae leo turpis. 
+        <h1 class="item">The Workspace</h1>
+        <p class="item">
+          Well, 2020 has been a not-so-nice year so far, what with the global pandemic and everything..<br/>
+          Corporate jobs, especially software development have been pushed to change their work culture, with many companies opting for 50%-100% remote work.
         </p>
+        <p class="item">
+          So, what does a truly inspiring and efficient workspace consist of? 
+        </p>
+        <p class="item">
+          Here's my attempt at describing a 3D rendition of an ideal workspace for maximum productivity.<br/>
+          Built using three.js with webpack, you can explore and interact with the essential tools that make up the work-from-home setup to get a feel of what its like, being an efficient employee in pyjamas!
+        </p>
+        <p class="para-bottom item">
+          <img src="assets/chrome-tr.png" alt=""/>Works best in Google Chrome<br/> 
+          <img src="assets/headphone-tr.png" alt=""/>Please use earphones for the full experience <br/>
+        </p>
+        <button class="item">Enter</button>
       </div>
     </div>
   </body>

@@ -77,7 +77,7 @@ module.exports = {
             ,
             {
                 // Load all icons
-                test: /\.(eot|woff|woff2|svg|ttf)([\?]?.*)$/,
+                test: /\.(eot|woff|woff2|svg|ttf|otf)([\?]?.*)$/,
                 use: [
                     {
                         loader: 'file-loader',
