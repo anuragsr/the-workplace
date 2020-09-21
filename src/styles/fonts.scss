@@ -3,3 +3,15 @@ $clock: 'clock';
   font-family: $clock;
   src: url(../fonts/DIGITALDREAMFATSKEW.ttf) format('truetype');
 }
+
+$ar-t: 'ar-t';
+@font-face {
+  font-family: $ar-t;
+  src: url(../fonts/arquitecta_thin.otf) format('opentype');
+}
+
+$ar-l: 'ar-l';
+@font-face {
+  font-family: $ar-l;
+  src: url('../fonts/Arquitecta W04 Lt.ttf') format('truetype');
+}

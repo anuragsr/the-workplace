@@ -1,12 +1,16 @@
-html, body, #three-ctn{
-  height: 100%;
-	width: 100%;
+* { box-sizing: border-box; }
+html, body, 
+#ctn-bg, 
+#ctn-three, 
+#ctn-loader{
+  @extend %fhw;
 }
 
 body {
-  font-family: 'Courier New', Courier, monospace;
-  text-align: center;
+  // font-family: 'Courier New', Courier, monospace;
+  // text-align: center;
   color: $w;
+  overflow: hidden;
 }
 
 .noselect {
@@ -20,6 +24,17 @@ body {
 
 .canvas-webGL{ @include pa(0, 0); }
 .canvas-css3D{ @include pa(0, 0); }
+
+#ctn-bg{
+  @include pa(0, 0);
+  filter: blur(4px);
+  // opacity: .4;
+  transform: scale(1);
+  transform-origin: center;
+}
+
+.loading{ opacity: 0!important; }
+
 .css3d{ 
   @include pa(0, 0);
   // opacity: 0;
@@ -45,8 +60,28 @@ img.css3d{
   &#phone{ height: 7px; width: 4px; }
 }
 
-@keyframes blink {
-	0% {opacity: 0}
-	49%{opacity: 0}
-	50% {opacity: 1}
+$pos: 40;
+#ctn-loader{
+  @include pa($pos, $pos);
+  // z-index: -1; 
+  width: calc(100% - #{$pos * 2}px);
+  height: calc(100% - #{$pos * 2}px);
+  background: rgba(48, 19, 54, .74);
+  padding: #{$pos/2}px;  
+  border-radius: 5px;
+  text-align: center;
+  .load{
+    height: 70px;
+  }
+  .content{
+    font-family: $ar-l;
+    padding: 0 #{$pos/2}px;  
+    h1{ font-family: $ar-t; }
+    p{ 
+      text-align: left;
+      font-size: 21px; 
+      width: 50vw;
+      margin: 0 auto;
+    }
+  }
 }

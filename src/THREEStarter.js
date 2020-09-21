@@ -33,8 +33,8 @@ export default class THREEStarter {
     this.h = this.ctn.height()
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    // this.renderer.shadowMap.enabled = true
-    // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
     this.renderer2 = new CSS3DRenderer()
 
     this.scene = new THREE.Scene()
@@ -48,6 +48,10 @@ export default class THREEStarter {
     this.actionCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000)
     this.actionCamera.name = "Action Camera"
     this.actionCameraHelper = new THREE.CameraHelper(this.actionCamera)
+    
+    this.tempCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
+    this.tempCamera.name = "Temp Camera"
+    this.tempCameraHelper = new THREE.CameraHelper(this.tempCamera)
 
     this.origin = new THREE.Vector3(0, 0, 0)
     // this.cameraStartPos = new THREE.Vector3(0, 150, 200)
@@ -79,7 +83,8 @@ export default class THREEStarter {
     this.lightPos2 = new THREE.Vector3(-500, 350, -500)
 
     this.loader = new THREELoader()
-    this.currentCamera = this.camera
+    // this.currentCamera = this.camera
+    this.currentCamera = this.actionCamera
     
     this.stats = new Stats()
     document.body.appendChild(this.stats.dom)
@@ -102,21 +107,62 @@ export default class THREEStarter {
     this.initGUI()
     this.addListeners()
     this.postProcess()
-    // this.preload()
 
     $('body').waitForImages(() => {
       l('All images have loaded.')
-      this.addObjects()
-    } 
-    // , function(loaded, count, success) {
-    //     l((loaded + 1) + ' of ' + count  + ' images has ' + (success ? 'loaded' : 'failed to load') +  '.')
-    //   }
-    )
+      gsap.to("#ctn-bg",{ duration: .5, opacity: .8 })
+      gsap.to("#ctn-loader .load",{ duration: .5, opacity: 1 })
+      
+      // Adding Floor to give base idea
+      this.addFloor()          
+    })
+  }
+  addFloor() {
+    const texLdr = new THREE.TextureLoader()    
+    , { createMesh } = this
+    texLdr.load('assets/textures/floor.png', floorImg => {
+      texLdr.load('assets/textures/floorBump.jpg', floorBump => {
+        const floor = createMesh(
+          new THREE.CircleGeometry( 150, 64 ),
+          new THREE.MeshPhongMaterial({ 
+            map: floorImg, 
+            bumpMap: floorBump, 
+            bumpScale: .1
+          })
+        )
+  
+        floor.receiveShadow = true
+        floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
+        floor.name = "Floor"
+  
+        this.introduce(floor)
+        this.addObjects()
+        gsap.fromTo(this.currentCamera.position, 
+          { y: 800 }, 
+          { 
+            duration: 15, y: 500,
+            onComplete: () => {
+              l("Bring scene into focus now!")
+              // $(".css3d").removeClass("loading")
+              // this.tempCamera.position.y = 300
+              // this.currentCamera = this.tempCamera
+            }
+          }
+        )
+        gsap.fromTo("#ctn-bg", 
+          { scale: 1 }, 
+          { 
+            duration: 15, scale: 1.15
+          }
+        )
+      })
+    })
   }
   initScene(){
     const { 
       ctn, w, h, camera, scene, 
       renderer, renderer2, roomCamera, actionCamera,
+      tempCamera,
       cameraStartPos, origin, roomControls, stats,
       spotLightMesh1, spotLight1, lightPos1,
       spotLightMesh2, spotLight2, lightPos2,       
@@ -143,9 +189,14 @@ export default class THREEStarter {
     scene.add(roomControls.getObject())
 
     actionCamera.position.copy(origin)
-    actionCamera.position.y = 2000
+    actionCamera.position.y = 700
     actionCamera.rotation.x = -Math.PI / 2
     scene.add(actionCamera)
+
+    tempCamera.position.copy(origin)
+    tempCamera.position.y = 500
+    tempCamera.rotation.x = -Math.PI / 2
+    scene.add(tempCamera)
 
     scene.add(new THREE.AmbientLight(0xffffff, .2))
 
@@ -158,9 +209,8 @@ export default class THREEStarter {
     spotLight2.position.copy(lightPos2)
     // scene.add(spotLight2)
 
-    this.toggleHelpers(!1)
     stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-
+    this.toggleHelpers(!1)
   }
   initGUI() {
     const guiObj = new ImplGUI()
@@ -186,7 +236,20 @@ export default class THREEStarter {
       // }, 1000);
       gsap.fromTo(this.currentCamera.position, 
         { y: 1000 }, 
-        { duration: 30, y: 500 }
+        { 
+          duration: 5, y: 500,
+          onComplete: () => {
+            l("Bring scene into focus now!")
+            // $(".css3d").removeClass("loading")
+            // this.currentCamera = this.tempCamera
+          }
+        }
+      )
+      gsap.fromTo("#ctn-bg", 
+        { scale: 1 }, 
+        { 
+          duration: 5, scale: 1.15
+        }
       )
     })
 
@@ -208,24 +271,30 @@ export default class THREEStarter {
     })
 
     gui.add(params, 'getState')
+    window.guiObj = guiObj
   }
   toggleHelpers(val) {
     const {
       scene, gridHelper, axesHelper, actionCameraHelper,
+      tempCameraHelper, stats,
       roomCameraHelper, spotLightMesh1, spotLightMesh2
     } = this
     if(val){
       scene.add(gridHelper)
       scene.add(axesHelper)
       // scene.add(roomCameraHelper)
-      scene.add(actionCameraHelper)
+      // scene.add(actionCameraHelper)
+      scene.add(tempCameraHelper)
       // scene.add(spotLightMesh1)
       // scene.add(spotLightMesh2)
+      stats.showPanel(0)
     } else{
       scene.remove(gridHelper)
       scene.remove(axesHelper)
       // scene.remove(roomCameraHelper)
-      scene.remove(actionCameraHelper)
+      // scene.remove(actionCameraHelper)
+      scene.remove(tempCameraHelper)
+      stats.showPanel(-1)
       // scene.remove(spotLightMesh1)
       // scene.remove(spotLightMesh2)
     }
@@ -248,7 +317,7 @@ export default class THREEStarter {
         composer.render(deltaTime)
       } else{
         renderer.render(scene, currentCamera)
-        renderer2.render(scene2, currentCamera )
+        renderer2.render(scene2, currentCamera)
       }
 
       stats.end()
@@ -369,28 +438,6 @@ export default class THREEStarter {
     , gltf = new GLTFLoader()  
     , mtl = new MTLLoader()
     , tds = new TDSLoader()
-    , addFloor = () => {
-      texLdr.load('assets/textures/floor.png', floorImg => {
-        texLdr.load('assets/textures/floorBump.jpg', floorBump => {
-          const floor = createMesh(
-            new THREE.CircleGeometry( 150, 64 ),
-            new THREE.MeshPhongMaterial({ 
-              map: floorImg, 
-              bumpMap: floorBump, 
-              bumpScale: .1,
-              // transparent: true, 
-              // opacity: 0
-            })
-          )
-    
-          floor.receiveShadow = true
-          floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
-          floor.name = "Floor"
-    
-          this.introduce(floor)
-        })
-      })
-    }
     , addCeiling = () => {
       const { roomHeight, workLightIntensity } = this
       , ceilingGroup = new THREE.Group()
@@ -779,7 +826,9 @@ export default class THREEStarter {
             if(['Cylinder', 'Cylinder.001', 'Cylinder.002', 'Cylinder.003'].includes(child.name))
               child.material.color = new THREE.Color(0x5b1212)            
             else child.material.color = new THREE.Color(0x000000)
+
             child.material.shininess = 10
+            // child.castShadow = true
           }
         })
         this.introduce(couch)
@@ -836,6 +885,7 @@ export default class THREEStarter {
         // l(chair)
         chair.traverse(child => {
           if(child.isMesh){
+            // child.castShadow = true
             child.material.color = new THREE.Color(0x000000)
             child.material.emissive = new THREE.Color(0x000000)
             child.material.shininess = 5
@@ -872,8 +922,6 @@ export default class THREEStarter {
     }
 
     (() => {
-      // Adding Floor
-      addFloor()
       // Adding Ceiling
       addCeiling()
       // Adding Wall
@@ -883,7 +931,7 @@ export default class THREEStarter {
       // Adding Posters
       addPosters()
       // Adding PC
-      addPC()       
+      addPC()
       // Adding Notepad, Pen Stand, Coffee
       addStationaryAndBeverage()
       // Adding Router, Mobile, Statue
@@ -923,21 +971,21 @@ export default class THREEStarter {
     composer.addPass(filmPass);
 
     this.composer = composer
-    window.composer = composer
+    // window.composer = composer
     
-    const gui = new dat.GUI();
-    {
-      const folder = gui.addFolder('BloomPass');
-      folder.add(bloomPass.copyUniforms.opacity, 'value', 0, 2).name('strength');
-      folder.open();
-    }
-    {
-      const folder = gui.addFolder('FilmPass');
-      folder.add(filmPass.uniforms.grayscale, 'value').name('grayscale');
-      folder.add(filmPass.uniforms.nIntensity, 'value', 0, 1).name('noise intensity');
-      folder.add(filmPass.uniforms.sIntensity, 'value', 0, 1).name('scanline intensity');
-      folder.add(filmPass.uniforms.sCount, 'value', 0, 1000).name('scanline count');
-      folder.open();
-    }
+    // const gui = new dat.GUI();
+    // {
+    //   const folder = gui.addFolder('BloomPass');
+    //   folder.add(bloomPass.copyUniforms.opacity, 'value', 0, 2).name('strength');
+    //   folder.open();
+    // }
+    // {
+    //   const folder = gui.addFolder('FilmPass');
+    //   folder.add(filmPass.uniforms.grayscale, 'value').name('grayscale');
+    //   folder.add(filmPass.uniforms.nIntensity, 'value', 0, 1).name('noise intensity');
+    //   folder.add(filmPass.uniforms.sIntensity, 'value', 0, 1).name('scanline intensity');
+    //   folder.add(filmPass.uniforms.sCount, 'value', 0, 1000).name('scanline count');
+    //   folder.open();
+    // }
   }
 }

@@ -4,6 +4,7 @@ import { l, cl } from './helpers'
 export default class ImplGUI{
   constructor(){
     this.gui = new dat.GUI()
+    window.dat = dat
   }
   getParams(){
     return {
