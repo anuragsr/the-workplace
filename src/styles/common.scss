@@ -2,7 +2,8 @@
 html, body, 
 #ctn-bg, 
 #ctn-three, 
-#ctn-loader{
+#ctn-loader,
+#ctn-actions{
   @extend %fhw;
 }
 
@@ -133,4 +134,14 @@ $pos: 40;
       }
     }
   }
+}
+
+#ctn-actions{
+  @include pa(0, 0);
+  z-index: 1;
+  display: flex; 
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 50px 70px;
+  .inner{ display: flex; flex-direction: column;}  
 }

@@ -19,7 +19,7 @@
       }
       #ctn-css3D{ display: none; }
       #ctn-loader .load, #ctn-loader .item{ opacity: 0; }
-      .dg.ac{ z-index: 4!important; }
+      .dg.ac{ z-index: 3!important; }
 
     </style>
   </head>
@@ -58,6 +58,51 @@
       <div class="css3d loading" id="smoke"><img src="assets/textures/smoke.gif" alt=""/></div>
       <img class="css3d loading" id="phone" src="assets/textures/phone.gif" alt=""/>
       <div class="css3d loading" id="time">Sat 11:45:07</div>
+    </div>
+    <div id="ctn-actions">
+      <div class="inner">        
+        <label class="volume">
+          <input type="checkbox">
+          <svg viewBox="0 0 108 96">
+              <path d="M7,28 L35,28 L35,28 L59,8 L59,88 L35,68 L7,68 C4.790861,68 3,66.209139 3,64 L3,32 C3,29.790861 4.790861,28 7,28 Z"></path>
+              <path d="M79,62 C83,57.3333333 85,52.6666667 85,48 C85,43.3333333 83,38.6666667 79,34 L49,3"></path>
+              <path d="M95,69 C101.666667,61.6666667 105,54.3333333 105,47 C105,39.6666667 101.666667,32.3333333 95,25 L75.5,6 L49,33"></path>
+          </svg>
+        </label>
+        
+        <div>
+          <div class="power-switch">
+            <input type="checkbox" />
+            <div class="button">
+              <svg class="power-off">
+                <use xlink:href="#line" class="line" />
+                <use xlink:href="#circle" class="circle" />
+              </svg>
+              <svg class="power-on">
+                <use xlink:href="#line" class="line" />
+                <use xlink:href="#circle" class="circle" />
+              </svg>
+            </div>
+          </div>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" id="line">
+              <line x1="75" y1="34" x2="75" y2="58"/>
+            </symbol>
+            <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" id="circle">
+              <circle cx="75" cy="80" r="35"/>
+            </symbol>
+          </svg>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox">
+          <div>
+              <span></span>
+          </div>
+        </label>
+        
+      </div>
     </div>
   </body>
 </html>

@@ -24,7 +24,9 @@ import * as dat from 'dat.gui'
 import THREELoader from './utils/loaders'
 import { l, cl } from './utils/helpers'
 // cl(); l(THREE)
-let then = 0, count = 0;
+let then = 0, count = 0
+, canMoveMouse = false
+, offset
 
 export default class THREEStarter {
   constructor(opts) {
@@ -98,6 +100,7 @@ export default class THREEStarter {
 
     this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 
+    this.mouse = new THREE.Vector2()
     // this.enableInspector()
   }
   enableInspector(){
@@ -109,8 +112,8 @@ export default class THREEStarter {
     let show = false
     // Initialize the scene
     this.initScene()
-    // show = true
-    // this.initGUI()
+    show = true
+    this.initGUI()
     this.toggleHelpers(show)
     this.addListeners()
     this.postProcess()
@@ -120,69 +123,17 @@ export default class THREEStarter {
       custom: { families: ['ar-l', 'ar-t', 'clock'] },
       active: () => {
         l("All fonts have loaded.")
+        gsap.to("#ctn-bg",{ duration: .5, opacity: .8 })
+        gsap.to("#ctn-loader .load",{ duration: .5, opacity: 1 })
+        
         $('body').waitForImages(() => {
-          l('All images have loaded.')
-          
-          gsap.to("#ctn-bg",{ duration: .5, opacity: .8 })
-          gsap.to("#ctn-loader .load",{ duration: .5, opacity: 1 })
+          l('All images have loaded.')          
           
           // Adding Floor to give base idea
           this.addFloor()          
         })
       }
     })
-  }
-  addFloor() {
-    const texLdr = new THREE.TextureLoader()    
-    , { createMesh } = this
-    texLdr.load('assets/textures/floor.png', floorImg => {
-      texLdr.load('assets/textures/floorBump.jpg', floorBump => {
-        const floor = createMesh(
-          new THREE.CircleGeometry( 150, 64 ),
-          new THREE.MeshPhongMaterial({ 
-            map: floorImg, 
-            bumpMap: floorBump, 
-            bumpScale: .1
-          })
-        )
-  
-        floor.receiveShadow = true
-        floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
-        floor.name = "Floor"
-  
-        this.introduce(floor)
-        this.startLoadingTl()
-        this.addObjects()        
-      })
-    })
-  }
-  startLoadingTl(){
-    const tl3D = new gsap.timeline()
-    , tlCSS = new gsap.timeline()
-  
-    tl3D.fromTo(this.currentCamera.position, 
-      { y: 800 }, 
-      { duration: 15, y: 500,
-        onComplete: () => {
-          // l("Bring scene into focus now!")
-          // $(".css3d").removeClass("loading")
-          // this.mouseCamera.position.y = 300
-          // this.currentCamera = this.mouseCamera
-        }
-      }
-    )
-  
-    tlCSS
-    .fromTo("#ctn-bg", 
-      { scale: 1 }, 
-      { duration: 15, scale: 1.15}
-    , "lb0")        
-    .to(".content .item", { 
-      duration: 2.5, opacity: 1, stagger: 5
-    }, "lb0")
-  
-    // tl3D.seek(tl3D.duration())
-    // tlCSS.seek(tlCSS.duration())
   }
   initScene(){
     const { 
@@ -215,7 +166,7 @@ export default class THREEStarter {
     scene.add(roomControls.getObject())
 
     blurCamera.position.copy(origin)
-    blurCamera.position.y = 700
+    blurCamera.position.y = 800
     blurCamera.rotation.x = -Math.PI / 2
     scene.add(blurCamera)
 
@@ -234,6 +185,46 @@ export default class THREEStarter {
     spotLightMesh2.position.copy(lightPos2)
     spotLight2.position.copy(lightPos2)
     // scene.add(spotLight2)
+  }
+  addFloor() {
+    const texLdr = new THREE.TextureLoader()    
+    , { createMesh } = this
+    texLdr.load('assets/textures/floor.png', floorImg => {
+      texLdr.load('assets/textures/floorBump.jpg', floorBump => {
+        const floor = createMesh(
+          new THREE.CircleGeometry( 150, 64 ),
+          new THREE.MeshPhongMaterial({ 
+            map: floorImg, 
+            bumpMap: floorBump, 
+            bumpScale: .1
+          })
+        )
+  
+        floor.receiveShadow = true
+        floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
+        floor.name = "Floor"
+  
+        this.introduce(floor)
+        this.startLoadingTl()
+      })
+    })
+  }
+  startLoadingTl(){
+    const tl3D = new gsap.timeline()
+    , tlCSS = new gsap.timeline()
+    , duration = 15, stagger = 5
+
+    tl3D
+    .to(this.currentCamera.position, { duration, y: 500 })
+  
+    tlCSS
+    .to("#ctn-bg", { duration, scale: 1.15 }, "lb0")
+    .to(".content .item", { duration: 2.5, opacity: 1, stagger }, "lb0")
+  
+    tl3D.seek(tl3D.duration())
+    tlCSS.seek(tlCSS.duration())
+    this.enableEnter()
+    this.addObjects()
   }
   initGUI() {
     const guiObj = new ImplGUI()
@@ -272,7 +263,8 @@ export default class THREEStarter {
       $(".css3d").toggleClass("lights-off")
     })
 
-    gui.add(params, 'getState')    
+    gui.add(params, 'getState')
+    gui.close()
   }
   toggleHelpers(val) {
     const {
@@ -339,36 +331,29 @@ export default class THREEStarter {
     renderer2.setSize(w, h)
   }
   onMouseMove(event) {
+    if(canMoveMouse){
+      // calculate mouse position in normalized device coordinates
+      // (-1 to +1) for both components
+      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-    // calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-  
-    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-    // Code for camera move
-  
-  }
-  onMouseClick(event) {
-
-    // calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-  
-    this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    // update the picking ray with the camera and mouse position
-    this.raycaster.setFromCamera( this.mouse, this.currentCamera );
-
-    // calculate objects intersecting the picking ray
-    var intersects = this.raycaster.intersectObjects( this.scene.children, true )
-    l(this.mouse, intersects.length, intersects[0].object.name)
-    // intersects.length && l(intersects.length)
+      // Code for camera move
+      // l(this.mouse)
+      offset = -.2
+      gsap.to(this.mouseCamera.rotation, {
+        duration: .5, delay: .1,
+        x: (this.mouse.y * .03) + offset,
+        y: (-this.mouse.x * .5)
+      })
+      // this.mouseCamera.rotation.x = (this.mouse.y * .03) + offset
+      // this.mouseCamera.rotation.y = (-this.mouse.x * .5)      
+    }
   }
   addListeners() {
     gsap.ticker.add(this.render.bind(this))
     window.addEventListener('resize', this.resize.bind(this), false)    
-    // window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
-    // window.addEventListener('click', this.onMouseClick.bind(this), false)
+    window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
+
     this.roomControls.addEventListener('lock', () => {
       this.currentCamera = this.roomCamera 
       this.controls.enabled = false
@@ -378,7 +363,6 @@ export default class THREEStarter {
       this.controls.enabled = true
     })
   
-    
     $("button.item").on("click", () => {
       l("Start the show!")
       
@@ -395,13 +379,14 @@ export default class THREEStarter {
       new gsap.timeline({
         onComplete: () => {
           l("Start mouse following!")
+          canMoveMouse = true
         }
       })
       .to("#ctn-bg", {
         duration: 1.5, scale: 1.25, opacity: 0
       }, "lb0")
       .to(this.currentCamera.position, { 
-        duration: 1.5, y: 80, z: 60,        
+        duration: 1.5, y: 60, z: 30
       }, "lb0")
       .to(this.currentCamera.rotation, { 
         duration: 1.5, x: -.35
@@ -428,8 +413,7 @@ export default class THREEStarter {
     )
     if(count === 25){
       l("All items added!")
-      $("#ctn-loader .load").fadeOut()
-      $("#ctn-loader button").fadeIn()
+      this.enableEnter()
     }
     // l(obj)
   }
@@ -437,13 +421,18 @@ export default class THREEStarter {
     this.scene2.add(obj)
     // l(obj)
   }
+  enableEnter(){    
+    $("#ctn-loader .load").fadeOut()
+    $("#ctn-loader button").fadeIn()
+  }
   addObjects(){
     const { renderer, scene, createMesh } = this
-    , texLdr = new THREE.TextureLoader()    
-    , fbx = new FBXLoader()
-    , gltf = new GLTFLoader()  
-    , mtl = new MTLLoader()
-    , tds = new TDSLoader()
+    , mgr = new THREE.LoadingManager()
+    , texLdr = new THREE.TextureLoader(mgr)    
+    , fbx = new FBXLoader(mgr)
+    , gltf = new GLTFLoader(mgr)  
+    , mtl = new MTLLoader(mgr)
+    , tds = new TDSLoader(mgr)
     , addCeiling = () => {
       const { roomHeight, workLightIntensity } = this
       , ceilingGroup = new THREE.Group()
@@ -824,6 +813,7 @@ export default class THREEStarter {
       tds.load('assets/models/sofa/the chair modeling.3ds', object => {
         const couch = object
         couch.name = "Couch"
+        couch.castShadow = true
         couch.rotation.set(-Math.PI / 2, 0, .88)
         couch.scale.multiplyScalar(10)
         couch.position.set(-105, 0, -79)
@@ -886,6 +876,7 @@ export default class THREEStarter {
       tds.load('assets/models/chair/armchair_BLEND.3ds', object => {
         const chair = object
         chair.name = "Chair"
+        chair.castShadow = true
         chair.rotation.set(-Math.PI / 2, 0, -3)
         chair.scale.multiplyScalar(7)
         chair.scale.z = 7.5
@@ -921,12 +912,18 @@ export default class THREEStarter {
         .load( 'assets/models/guitar/10367_AcousticGuitar_v01_it2.obj', object => {
           const guitar = object
           guitar.name = "Guitar"
+          guitar.castShadow = true
           guitar.scale.multiplyScalar(.035)
           guitar.rotation.set(-1.7, .1, 2)
           guitar.position.set(110, 0, -85)
           this.introduce(guitar)
         })
       })
+    }
+
+    mgr.onError = url => {
+      l('There was an error loading ' + url)
+      this.enableEnter()
     }
 
     (() => {
