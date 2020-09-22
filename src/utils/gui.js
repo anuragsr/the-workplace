@@ -12,7 +12,8 @@ export default class ImplGUI{
       , message: 'Customize here'
       , defaultCam: function () { }
       , roomCam: function () { }
-      , actionCam: function () { }
+      , blurCam: function () { }
+      , mouseCam: function () { }
       , workLights: true
       , getState: function () { l(this) }
     }

@@ -45,13 +45,15 @@ export default class THREEStarter {
     this.roomCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
     this.roomCameraHelper = new THREE.CameraHelper(this.roomCamera)
 
-    this.actionCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000)
-    this.actionCamera.name = "Action Camera"
-    this.actionCameraHelper = new THREE.CameraHelper(this.actionCamera)
+    this.blurCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000)
+    this.blurCamera.name = "Blur Camera"
+    this.blurCameraHelper = new THREE.CameraHelper(this.blurCamera)
     
-    this.tempCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
-    this.tempCamera.name = "Temp Camera"
-    this.tempCameraHelper = new THREE.CameraHelper(this.tempCamera)
+    this.mouseCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
+    this.mouseCamera.name = "Mouse Camera"
+    this.mouseCameraHelper = new THREE.CameraHelper(this.mouseCamera)
+
+    window.mouseCamera = this.mouseCamera
 
     this.origin = new THREE.Vector3(0, 0, 0)
     // this.cameraStartPos = new THREE.Vector3(0, 150, 200)
@@ -84,7 +86,7 @@ export default class THREEStarter {
 
     this.loader = new THREELoader()
     // this.currentCamera = this.camera
-    this.currentCamera = this.actionCamera
+    this.currentCamera = this.blurCamera
     
     this.stats = new Stats()
     document.body.appendChild(this.stats.dom)
@@ -94,6 +96,8 @@ export default class THREEStarter {
     this.workLightIntensity = 2
     this.roomHeight = 100    
 
+    this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+
     // this.enableInspector()
   }
   enableInspector(){
@@ -102,19 +106,30 @@ export default class THREEStarter {
     window.scene = this.scene
   }
   init() {
+    let show = false
     // Initialize the scene
     this.initScene()
+    // show = true
     // this.initGUI()
+    this.toggleHelpers(show)
     this.addListeners()
     this.postProcess()
-
-    $('body').waitForImages(() => {
-      l('All images have loaded.')
-      gsap.to("#ctn-bg",{ duration: .5, opacity: .8 })
-      gsap.to("#ctn-loader .load",{ duration: .5, opacity: 1 })
-      
-      // Adding Floor to give base idea
-      this.addFloor()          
+    
+    const WebFont = require('webfontloader')
+    WebFont.load({
+      custom: { families: ['ar-l', 'ar-t', 'clock'] },
+      active: () => {
+        l("All fonts have loaded.")
+        $('body').waitForImages(() => {
+          l('All images have loaded.')
+          
+          gsap.to("#ctn-bg",{ duration: .5, opacity: .8 })
+          gsap.to("#ctn-loader .load",{ duration: .5, opacity: 1 })
+          
+          // Adding Floor to give base idea
+          this.addFloor()          
+        })
+      }
     })
   }
   addFloor() {
@@ -136,41 +151,44 @@ export default class THREEStarter {
         floor.name = "Floor"
   
         this.introduce(floor)
-        this.addObjects()
-        const tl3D = new gsap.timeline()
-        const tlCSS = new gsap.timeline()
-
-        tl3D.fromTo(this.currentCamera.position, 
-          { y: 800 }, 
-          { 
-            duration: 15, y: 500,
-            onComplete: () => {
-              l("Bring scene into focus now!")
-              // $(".css3d").removeClass("loading")
-              // this.tempCamera.position.y = 300
-              // this.currentCamera = this.tempCamera
-            }
-          }
-        )
-
-        tlCSS
-        .fromTo("#ctn-bg", 
-          { scale: 1 }, 
-          { duration: 15, scale: 1.15}
-        , "lb0")        
-        .to(".content .item", { 
-          duration: 2.5, opacity: 1, stagger: 5
-        }, "lb0")
-
-        tlCSS.seek(tlCSS.duration())
+        this.startLoadingTl()
+        this.addObjects()        
       })
     })
+  }
+  startLoadingTl(){
+    const tl3D = new gsap.timeline()
+    , tlCSS = new gsap.timeline()
+  
+    tl3D.fromTo(this.currentCamera.position, 
+      { y: 800 }, 
+      { duration: 15, y: 500,
+        onComplete: () => {
+          // l("Bring scene into focus now!")
+          // $(".css3d").removeClass("loading")
+          // this.mouseCamera.position.y = 300
+          // this.currentCamera = this.mouseCamera
+        }
+      }
+    )
+  
+    tlCSS
+    .fromTo("#ctn-bg", 
+      { scale: 1 }, 
+      { duration: 15, scale: 1.15}
+    , "lb0")        
+    .to(".content .item", { 
+      duration: 2.5, opacity: 1, stagger: 5
+    }, "lb0")
+  
+    // tl3D.seek(tl3D.duration())
+    // tlCSS.seek(tlCSS.duration())
   }
   initScene(){
     const { 
       ctn, w, h, camera, scene, 
-      renderer, renderer2, roomCamera, actionCamera,
-      tempCamera,
+      renderer, renderer2, roomCamera, blurCamera,
+      mouseCamera,
       cameraStartPos, origin, roomControls, stats,
       spotLightMesh1, spotLight1, lightPos1,
       spotLightMesh2, spotLight2, lightPos2,       
@@ -196,15 +214,15 @@ export default class THREEStarter {
     scene.add(roomCamera)
     scene.add(roomControls.getObject())
 
-    actionCamera.position.copy(origin)
-    actionCamera.position.y = 700
-    actionCamera.rotation.x = -Math.PI / 2
-    scene.add(actionCamera)
+    blurCamera.position.copy(origin)
+    blurCamera.position.y = 700
+    blurCamera.rotation.x = -Math.PI / 2
+    scene.add(blurCamera)
 
-    tempCamera.position.copy(origin)
-    tempCamera.position.y = 500
-    tempCamera.rotation.x = -Math.PI / 2
-    scene.add(tempCamera)
+    mouseCamera.position.copy(origin)
+    mouseCamera.position.y = 500
+    mouseCamera.rotation.x = -Math.PI / 2
+    scene.add(mouseCamera)
 
     scene.add(new THREE.AmbientLight(0xffffff, .2))
 
@@ -216,9 +234,6 @@ export default class THREEStarter {
     spotLightMesh2.position.copy(lightPos2)
     spotLight2.position.copy(lightPos2)
     // scene.add(spotLight2)
-
-    stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-    this.toggleHelpers(!1)
   }
   initGUI() {
     const guiObj = new ImplGUI()
@@ -227,7 +242,8 @@ export default class THREEStarter {
     , he = gui.add(params, 'helpers')
     , defaultCam = gui.add(params, 'defaultCam')
     , roomCam = gui.add(params, 'roomCam')
-    , actionCam = gui.add(params, 'actionCam')
+    , blurCam = gui.add(params, 'blurCam')
+    , mouseCam = gui.add(params, 'mouseCam')
     , workLights = gui.add(params, 'workLights')
 
     he.onChange(value => this.toggleHelpers(value))
@@ -236,30 +252,8 @@ export default class THREEStarter {
       this.currentCamera = this.camera
     })
     roomCam.onChange(() => { this.roomControls.lock() })
-    actionCam.onChange(() => {
-      this.currentCamera = this.actionCamera 
-      // this.currentCamera.position.y = 500
-      // setTimeout(() => {
-      //   this.composer.renderToScreen = false;        
-      // }, 1000);
-      // gsap.fromTo(this.currentCamera.position, 
-      //   { y: 1000 }, 
-      //   { 
-      //     duration: 5, y: 500,
-      //     onComplete: () => {
-      //       l("Bring scene into focus now!")
-      //       // $(".css3d").removeClass("loading")
-      //       // this.currentCamera = this.tempCamera
-      //     }
-      //   }
-      // )
-      // gsap.fromTo("#ctn-bg", 
-      //   { scale: 1 }, 
-      //   { 
-      //     duration: 5, scale: 1.15
-      //   }
-      // )
-    })
+    blurCam.onChange(() => { this.currentCamera = this.blurCamera })
+    mouseCam.onChange(() => { this.currentCamera = this.mouseCamera })
 
     workLights.onChange(value => {
       if(!value){
@@ -278,33 +272,23 @@ export default class THREEStarter {
       $(".css3d").toggleClass("lights-off")
     })
 
-    gui.add(params, 'getState')
-    window.guiObj = guiObj
+    gui.add(params, 'getState')    
   }
   toggleHelpers(val) {
     const {
-      scene, gridHelper, axesHelper, actionCameraHelper,
-      tempCameraHelper, stats,
-      roomCameraHelper, spotLightMesh1, spotLightMesh2
+      scene, gridHelper, axesHelper,
+      mouseCameraHelper, stats,
     } = this
     if(val){
       scene.add(gridHelper)
       scene.add(axesHelper)
-      // scene.add(roomCameraHelper)
-      // scene.add(actionCameraHelper)
-      scene.add(tempCameraHelper)
-      // scene.add(spotLightMesh1)
-      // scene.add(spotLightMesh2)
+      scene.add(mouseCameraHelper)
       stats.showPanel(0)
     } else{
       scene.remove(gridHelper)
       scene.remove(axesHelper)
-      // scene.remove(roomCameraHelper)
-      // scene.remove(actionCameraHelper)
-      scene.remove(tempCameraHelper)
+      scene.remove(mouseCameraHelper)
       stats.showPanel(-1)
-      // scene.remove(spotLightMesh1)
-      // scene.remove(spotLightMesh2)
     }
   }
   render(now) {
@@ -321,7 +305,7 @@ export default class THREEStarter {
       now *= 0.001;  // convert to seconds
       const deltaTime = now - then;
       then = now;
-      if(currentCamera.name === "Action Camera"){
+      if(currentCamera.name === "Blur Camera"){
         composer.render(deltaTime)
       } else{
         renderer.render(scene, currentCamera)
@@ -336,7 +320,7 @@ export default class THREEStarter {
   }
   resize() {
     let {
-      w, h, ctn, camera, actionCamera,
+      w, h, ctn, camera, blurCamera,
       roomCamera, renderer, renderer2
     } = this
     
@@ -348,8 +332,8 @@ export default class THREEStarter {
     roomCamera.aspect = w / h
     roomCamera.updateProjectionMatrix()
 
-    actionCamera.aspect = w / h
-    actionCamera.updateProjectionMatrix()
+    blurCamera.aspect = w / h
+    blurCamera.updateProjectionMatrix()
   
     renderer.setSize(w, h)
     renderer2.setSize(w, h)
@@ -385,7 +369,6 @@ export default class THREEStarter {
     window.addEventListener('resize', this.resize.bind(this), false)    
     // window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
     // window.addEventListener('click', this.onMouseClick.bind(this), false)
-
     this.roomControls.addEventListener('lock', () => {
       this.currentCamera = this.roomCamera 
       this.controls.enabled = false
@@ -393,6 +376,36 @@ export default class THREEStarter {
     this.roomControls.addEventListener('unlock', () => {
       this.currentCamera = this.camera 
       this.controls.enabled = true
+    })
+  
+    
+    $("button.item").on("click", () => {
+      l("Start the show!")
+      
+      this.currentCamera = this.mouseCamera
+      
+      gsap.to("#ctn-loader", {
+        duration: .3, scale: 1.25, opacity: 0,
+        onComplete: function(){
+          $(".css3d").removeClass("loading")
+          $("#ctn-loader").hide()
+        }
+      })
+
+      new gsap.timeline({
+        onComplete: () => {
+          l("Start mouse following!")
+        }
+      })
+      .to("#ctn-bg", {
+        duration: 1.5, scale: 1.25, opacity: 0
+      }, "lb0")
+      .to(this.currentCamera.position, { 
+        duration: 1.5, y: 80, z: 60,        
+      }, "lb0")
+      .to(this.currentCamera.rotation, { 
+        duration: 1.5, x: -.35
+      }, "lb0")
     })
   }
   createMesh(geometry, material, materialOptions){
@@ -407,40 +420,22 @@ export default class THREEStarter {
     return new THREE.Mesh(geometry, material)
   }
   introduce(obj){
-    const { scene, workLightIntensity } = this, duration = 2
-    scene.add(obj)
+    this.scene.add(obj)
     count++
     l(`${count} of 25 items added : ${obj.name}`)
-    count === 25 && l("All items added!")
+    $("#ctn-loader .load span").html(
+      `Loading ${Math.round(count*100/25)}%`
+    )
+    if(count === 25){
+      l("All items added!")
+      $("#ctn-loader .load").fadeOut()
+      $("#ctn-loader button").fadeIn()
+    }
     // l(obj)
-
-    // switch(obj.type){
-    //   case 'Mesh':
-    //     gsap.to(obj.material, { duration, opacity: 1 })
-    //     break;
-
-    //   case 'Group':
-    //     obj.traverse(child => {
-
-    //       switch(child.type){
-    //         case 'Mesh':
-    //           gsap.to(child.material, { duration, opacity: 1 })
-    //           break;
-            
-    //         case 'PointLight':
-    //           gsap.to(child, { duration, intensity: workLightIntensity })
-    //           break;
-    //       }
-
-    //     })
-    //     break;
-    // }
   }
   introduceCSS3D(obj){
-    const { scene2 } = this, duration = 2
-    scene2.add(obj)
+    this.scene2.add(obj)
     // l(obj)
-    // gsap.to(obj.element, { duration, opacity: 1 })
   }
   addObjects(){
     const { renderer, scene, createMesh } = this
@@ -746,10 +741,10 @@ export default class THREEStarter {
           showpiece.scale.multiplyScalar(.04)
           showpiece.rotation.set(-Math.PI / 2, 0, -.2)
           showpiece.position.set(-55, 27, -117)
-          showpiece.children[0].material.color = new THREE.Color(0x962fda)
+          showpiece.children[0].material.color = new THREE.Color(0xD3D3D3)
           showpiece.children[0].material.needsUpdate = true
           showpiece.children[0].castShadow = true
-          showpiece.children[1].material.color = new THREE.Color(0x962fda)
+          showpiece.children[1].material.color = new THREE.Color(0xD3D3D3)
           showpiece.children[1].material.needsUpdate = true
           showpiece.children[1].castShadow = true
     
@@ -778,7 +773,7 @@ export default class THREEStarter {
     
       const timeDiv = new CSS3DObject($("#time")[0])
       timeDiv.rotation.set(0, .3, 0)
-      timeDiv.position.set(-50, 28.5, -100)
+      timeDiv.position.set(-50, 30, -100)
       this.introduceCSS3D(timeDiv)
   
       const length = 16, width = 2  
@@ -961,10 +956,10 @@ export default class THREEStarter {
   }
   postProcess(){
     const {
-      renderer, scene, actionCamera
+      renderer, scene, blurCamera
     } = this
     const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, actionCamera));
+    composer.addPass(new RenderPass(scene, blurCamera));
 
     const bloomPass = new BloomPass(
         1,    // strength

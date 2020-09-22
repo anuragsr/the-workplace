@@ -22,15 +22,19 @@ body {
             user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
-.canvas-webGL{ @include pa(0, 0); }
-.canvas-css3D{ @include pa(0, 0); }
-
 #ctn-bg{
   @include pa(0, 0);
+  z-index: 0;
   filter: blur(4px);
-  // opacity: .4;
   transform: scale(1);
   transform-origin: center;
+}
+
+#ctn-three{
+  position: relative;
+  z-index: 1;
+  .canvas-webGL{ @include pa(0, 0); }
+  .canvas-css3D{ @include pa(0, 0); }
 }
 
 .loading{ opacity: 0!important; }
@@ -63,11 +67,13 @@ img.css3d{
 $pos: 40;
 #ctn-loader{
   @include pa($pos, $pos);
+  z-index: 2;
   // @extend %j-c;
   // z-index: -1; 
   width: calc(100% - #{$pos * 2}px);
   height: calc(100% - #{$pos * 2}px);
-  background: rgba(48, 19, 54, .74);
+  // background: rgba(48, 19, 54, .74);
+  background: rgba(16, 79, 63, .75);
   padding: #{$pos/2}px;  
   border-radius: 5px;
   text-align: center;
@@ -105,9 +111,10 @@ $pos: 40;
       }
     }
     button{
+      display: none;
       position: relative;
       background: transparent;
-      border: 2px solid #ffb6bb;
+      border: 2px solid #689cc5;
       color: $w;
       width: 125px;
       height: 125px;
@@ -116,7 +123,13 @@ $pos: 40;
       cursor: pointer;
       transition: all .2s;
       &:hover{
-        background: rgba(222, 163, 234, .46);
+        // background: rgba(222, 163, 234, .46);
+        background: rgba(16, 79, 63, .85);
+        color: #689cc5;
+      }
+      &:focus{
+        outline: none!important;
+        box-shadow: none!important;
       }
     }
   }

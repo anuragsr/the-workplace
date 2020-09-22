@@ -11,35 +11,25 @@
     <!-- Mobile header color for iOS Safari (supports black, black-translucent or default) -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default">    
     <style>
-      body{ 
-        /* background: rgb(36, 41, 46);  */
-        background: rgb(0, 0, 0); 
-      }
+      body{ background: rgb(0, 0, 0); }
       #ctn-bg{
-        background: url(assets/nightbg2.jpg) no-repeat center;
+        background: url(assets/nightbg3.jpg) no-repeat center;
         background-size: cover;
         opacity: 0;
       }
       #ctn-css3D{ display: none; }
-      /* #ctn-loader{ display: flex; align-items: center; justify-content: center; } */
       #ctn-loader .load, #ctn-loader .item{ opacity: 0; }
+      .dg.ac{ z-index: 4!important; }
+
     </style>
   </head>
   <body class="noselect">
     <div id="ctn-bg"></div>
     <div id="ctn-three"></div>
-    <div id="ctn-css3D">
-      <img class="css3d loading" id="monitorPr" src="assets/textures/website.gif" alt=""/>
-      <img class="css3d loading" id="monitorSc1" src="assets/textures/coding.gif" alt=""/>
-      <img class="css3d loading" id="monitorSc2" src="assets/textures/server.gif" alt=""/>
-      <div class="css3d loading" id="smoke"><img src="assets/textures/smoke.gif" alt=""/></div>
-      <img class="css3d loading" id="phone" src="assets/textures/phone.gif" alt=""/>
-      <div class="css3d loading" id="time">Sat 11:45:07</div>
-    </div>
-    <div id="ctn-loader">      
+    <div id="ctn-loader">
       <div class="load">
-        <img src="assets/Blocks-1s-200px.gif" alt="">
-        <span>Loading, please wait...</span>
+        <img src="assets/Blocks-1s-200px2.gif" alt="">
+        <span>Loading 1%</span>
       </div>
       <div class="content">
         <h1 class="item">The Workspace</h1>
@@ -60,6 +50,14 @@
         </p>
         <button class="item">Enter</button>
       </div>
+    </div>
+    <div id="ctn-css3D">
+      <img class="css3d loading" id="monitorPr" src="assets/textures/website.gif" alt=""/>
+      <img class="css3d loading" id="monitorSc1" src="assets/textures/coding.gif" alt=""/>
+      <img class="css3d loading" id="monitorSc2" src="assets/textures/server.gif" alt=""/>
+      <div class="css3d loading" id="smoke"><img src="assets/textures/smoke.gif" alt=""/></div>
+      <img class="css3d loading" id="phone" src="assets/textures/phone.gif" alt=""/>
+      <div class="css3d loading" id="time">Sat 11:45:07</div>
     </div>
   </body>
 </html>
