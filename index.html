@@ -18,7 +18,7 @@
         opacity: 0;
       }
       #ctn-css3D{ display: none; }
-      #ctn-loader .load, #ctn-loader .item{ opacity: 0; }
+      #ctn-loader .load, #ctn-loader .item, #ctn-actions{ opacity: 0; }
       .dg.ac{ z-index: 3!important; }
 
     </style>
@@ -44,10 +44,16 @@
           Here's my attempt at describing a 3D rendition of an ideal workspace for maximum productivity.<br/>
           Built using three.js with webpack, you can explore and interact with the essential tools that make up the work-from-home setup to get a feel of what its like, being an efficient employee in pyjamas!
         </p>
-        <p class="para-bottom item">
-          <img src="assets/chrome-tr.png" alt=""/>Works best in Google Chrome<br/> 
-          <img src="assets/headphone-tr.png" alt=""/>Please use earphones for the full experience <br/>
-        </p>
+        <div class="para-bottom item">
+          <div>
+            <p><img src="assets/chrome-tr.png" alt=""/>Works best in Google Chrome</p> 
+            <p><img src="assets/mouse-tr.png" alt=""/>Move mouse to navigate the scene</p>
+          </div>
+          <div>
+            <p><img src="assets/headphone-tr.png" alt=""/>Please use earphones for the full experience</p> 
+            <p><img src="assets/setting-tr.png" alt=""/>Control the scene with actions on the right</p>
+          </div>
+        </div>
         <button class="item">Enter</button>
       </div>
     </div>
@@ -60,19 +66,19 @@
       <div class="css3d loading" id="time">Sat 11:45:07</div>
     </div>
     <div id="ctn-actions">
-      <div class="inner">        
-        <label class="volume">
-          <input type="checkbox">
+      <div class="inner">
+        <label class="volume" title="Toggle Sound">
+          <input id="mute-check" type="checkbox">
           <svg viewBox="0 0 108 96">
               <path d="M7,28 L35,28 L35,28 L59,8 L59,88 L35,68 L7,68 C4.790861,68 3,66.209139 3,64 L3,32 C3,29.790861 4.790861,28 7,28 Z"></path>
               <path d="M79,62 C83,57.3333333 85,52.6666667 85,48 C85,43.3333333 83,38.6666667 79,34 L49,3"></path>
               <path d="M95,69 C101.666667,61.6666667 105,54.3333333 105,47 C105,39.6666667 101.666667,32.3333333 95,25 L75.5,6 L49,33"></path>
-          </svg>
+          </svg>          
         </label>
         
-        <div>
-          <div class="power-switch">
-            <input type="checkbox" />
+        <div class="ctn-power-switch">
+          <div class="power-switch" title="Toggle Lights">
+            <input id="light-check" type="checkbox" checked/>
             <div class="button">
               <svg class="power-off">
                 <use xlink:href="#line" class="line" />
@@ -82,7 +88,7 @@
                 <use xlink:href="#line" class="line" />
                 <use xlink:href="#circle" class="circle" />
               </svg>
-            </div>
+            </div>            
           </div>
           
           <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -95,13 +101,12 @@
           </svg>
         </div>
 
-        <label class="switch">
-          <input type="checkbox">
+        <label class="switch" title="Toggle Annotations">
+          <input id="ann-check" type="checkbox" checked>
           <div>
               <span></span>
-          </div>
+          </div>          
         </label>
-        
       </div>
     </div>
   </body>

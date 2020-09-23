@@ -248,7 +248,7 @@ export default class THREEStarter {
 
     workLights.onChange(value => {
       if(!value){
-        this.workLightArr.reverse().forEach((lt, idx) => {
+        this.workLightArr.slice().reverse().forEach((lt, idx) => {
           setTimeout(() => { 
             lt.intensity = 0 
           }, idx * 200)
@@ -260,7 +260,7 @@ export default class THREEStarter {
           }, idx * 200)
         })
       }
-      $(".css3d").toggleClass("lights-off")
+      $("#smoke").toggleClass("lights-off")
     })
 
     gui.add(params, 'getState')
@@ -310,89 +310,6 @@ export default class THREEStarter {
       gsap.ticker.remove(this.render.bind(this))
     }
   }
-  resize() {
-    let {
-      w, h, ctn, camera, blurCamera,
-      roomCamera, renderer, renderer2
-    } = this
-    
-    w = ctn.width()
-    h = ctn.height()
-    camera.aspect = w / h
-    camera.updateProjectionMatrix()
-  
-    roomCamera.aspect = w / h
-    roomCamera.updateProjectionMatrix()
-
-    blurCamera.aspect = w / h
-    blurCamera.updateProjectionMatrix()
-  
-    renderer.setSize(w, h)
-    renderer2.setSize(w, h)
-  }
-  onMouseMove(event) {
-    if(canMoveMouse){
-      // calculate mouse position in normalized device coordinates
-      // (-1 to +1) for both components
-      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-      // Code for camera move
-      // l(this.mouse)
-      offset = -.2
-      gsap.to(this.mouseCamera.rotation, {
-        duration: .5, delay: .1,
-        x: (this.mouse.y * .03) + offset,
-        y: (-this.mouse.x * .5)
-      })
-      // this.mouseCamera.rotation.x = (this.mouse.y * .03) + offset
-      // this.mouseCamera.rotation.y = (-this.mouse.x * .5)      
-    }
-  }
-  addListeners() {
-    gsap.ticker.add(this.render.bind(this))
-    window.addEventListener('resize', this.resize.bind(this), false)    
-    window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
-
-    this.roomControls.addEventListener('lock', () => {
-      this.currentCamera = this.roomCamera 
-      this.controls.enabled = false
-    })
-    this.roomControls.addEventListener('unlock', () => {
-      this.currentCamera = this.camera 
-      this.controls.enabled = true
-    })
-  
-    $("button.item").on("click", () => {
-      l("Start the show!")
-      
-      this.currentCamera = this.mouseCamera
-      
-      gsap.to("#ctn-loader", {
-        duration: .3, scale: 1.25, opacity: 0,
-        onComplete: function(){
-          $(".css3d").removeClass("loading")
-          $("#ctn-loader").hide()
-        }
-      })
-
-      new gsap.timeline({
-        onComplete: () => {
-          l("Start mouse following!")
-          canMoveMouse = true
-        }
-      })
-      .to("#ctn-bg", {
-        duration: 1.5, scale: 1.25, opacity: 0
-      }, "lb0")
-      .to(this.currentCamera.position, { 
-        duration: 1.5, y: 60, z: 30
-      }, "lb0")
-      .to(this.currentCamera.rotation, { 
-        duration: 1.5, x: -.35
-      }, "lb0")
-    })
-  }
   createMesh(geometry, material, materialOptions){
     if(materialOptions) {
       let { wrapping, repeat, minFilter } = materialOptions
@@ -417,11 +334,122 @@ export default class THREEStarter {
     }
     // l(obj)
   }
-  introduceCSS3D(obj){
-    this.scene2.add(obj)
-    // l(obj)
+  introduceCSS3D(obj){ this.scene2.add(obj) }
+  addListeners() {
+    gsap.ticker.add(this.render.bind(this))
+    window.addEventListener('resize', this.resize.bind(this), false)    
+    // window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
+
+    this.roomControls.addEventListener('lock', () => {
+      this.currentCamera = this.roomCamera 
+      this.controls.enabled = false
+    })
+    this.roomControls.addEventListener('unlock', () => {
+      this.currentCamera = this.camera 
+      this.controls.enabled = true
+    })
+  
+    $("button.item").on("click", this.enterRoom.bind(this))
+    
+    $("#mute-check").on("change", function() {
+      if($(this).prop('checked')) {
+          l("mute CheckBox Selected")
+      } else {
+          l("mute CheckBox deselect")
+      }
+    })
+    
+    $("#light-check").on("change", e => {
+      if(!$(e.target).prop('checked')){
+        gsap.to(this.workLightArr.slice().reverse(), {
+          duration: .5, stagger: .2,
+          intensity: 0
+        })
+      } else {
+        gsap.to(this.workLightArr, {
+          duration: .5, stagger: .2,
+          intensity: this.workLightIntensity
+        })
+      }
+      $("#smoke").toggleClass("lights-off")
+    })    
+    
+    $("#ann-check").on("change", function() {
+      if($(this).prop('checked')) {
+          l("ann CheckBox Selected")
+      } else {
+          l("ann CheckBox deselect")
+      }
+    })
   }
-  enableEnter(){    
+  resize() {
+    let {
+      w, h, ctn, camera, blurCamera,
+      roomCamera, renderer, renderer2, mouseCamera
+    } = this
+    
+    w = ctn.width()
+    h = ctn.height()
+
+    camera.aspect = w / h
+    camera.updateProjectionMatrix()
+  
+    roomCamera.aspect = w / h
+    roomCamera.updateProjectionMatrix()
+
+    blurCamera.aspect = w / h
+    blurCamera.updateProjectionMatrix()
+
+    mouseCamera.aspect = w / h
+    mouseCamera.updateProjectionMatrix()
+  
+    renderer.setSize(w, h)
+    renderer2.setSize(w, h)
+  }
+  onMouseMove(event) {
+    if(canMoveMouse){
+      // calculate mouse position in normalized device coordinates
+      // (-1 to +1) for both components
+      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+      // Code for camera move
+      // l(this.mouse)
+      offset = -.2
+      gsap.to(this.mouseCamera.rotation, {
+        duration: .5, delay: .1,
+        x: (this.mouse.y * .03) + offset,
+        y: (-this.mouse.x * .5)
+      })
+      // this.mouseCamera.rotation.x = (this.mouse.y * .03) + offset
+      // this.mouseCamera.rotation.y = (-this.mouse.x * .5)      
+    }
+  }
+  enterRoom(){
+    l("Start the show!")
+      
+    this.currentCamera = this.mouseCamera
+    
+    gsap.to("#ctn-loader", {
+      duration: .3, scale: 1.25, opacity: 0,
+      onComplete: function(){
+        $(".css3d").removeClass("loading")
+        $("#ctn-loader").hide()
+      }
+    })
+
+    new gsap.timeline({
+      onComplete: () => {
+        l("Start mouse following!")
+        canMoveMouse = true
+      }
+    })
+    .to("#ctn-bg", { duration: 1.5, scale: 1.25, opacity: 0 }, "lb0")
+    .to("#ctn-actions", { duration: 1.5, opacity: 1 }, "lb0")
+    .to(this.currentCamera.position, { duration: 1.5, y: 70, z: 30 }, "lb0")
+    .to(this.currentCamera.rotation, { duration: 1.5, x: -.35 }, "lb0")
+  }
+  enableEnter(){
     $("#ctn-loader .load").fadeOut()
     $("#ctn-loader button").fadeIn()
   }
@@ -813,7 +841,6 @@ export default class THREEStarter {
       tds.load('assets/models/sofa/the chair modeling.3ds', object => {
         const couch = object
         couch.name = "Couch"
-        couch.castShadow = true
         couch.rotation.set(-Math.PI / 2, 0, .88)
         couch.scale.multiplyScalar(10)
         couch.position.set(-105, 0, -79)
@@ -825,7 +852,7 @@ export default class THREEStarter {
             else child.material.color = new THREE.Color(0x000000)
 
             child.material.shininess = 10
-            // child.castShadow = true
+            child.castShadow = true
           }
         })
         this.introduce(couch)
@@ -876,7 +903,6 @@ export default class THREEStarter {
       tds.load('assets/models/chair/armchair_BLEND.3ds', object => {
         const chair = object
         chair.name = "Chair"
-        chair.castShadow = true
         chair.rotation.set(-Math.PI / 2, 0, -3)
         chair.scale.multiplyScalar(7)
         chair.scale.z = 7.5
@@ -884,7 +910,7 @@ export default class THREEStarter {
         // l(chair)
         chair.traverse(child => {
           if(child.isMesh){
-            // child.castShadow = true
+            child.castShadow = true
             child.material.color = new THREE.Color(0x000000)
             child.material.emissive = new THREE.Color(0x000000)
             child.material.shininess = 5
@@ -899,6 +925,7 @@ export default class THREEStarter {
         .load( 'assets/models/guitar/Miramondo_Hot_Shot_Stool.obj', object => {
           const stool = object
           stool.name = "Stool"
+          stool.children[0].castShadow = true
           stool.scale.multiplyScalar(.2)
           stool.rotation.set(-Math.PI / 2, 0, -Math.PI / 2)
           stool.position.set(120, 0, -70)
@@ -912,7 +939,7 @@ export default class THREEStarter {
         .load( 'assets/models/guitar/10367_AcousticGuitar_v01_it2.obj', object => {
           const guitar = object
           guitar.name = "Guitar"
-          guitar.castShadow = true
+          guitar.children[0].castShadow = true
           guitar.scale.multiplyScalar(.035)
           guitar.rotation.set(-1.7, .1, 2)
           guitar.position.set(110, 0, -85)

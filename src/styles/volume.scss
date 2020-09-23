@@ -1,8 +1,10 @@
 .volume {
+  transform: scale(.5);
   --line: #fff;
   --line-width: 6px;
   --duration: .5s;
-  position: relative;
+  position: relative;  
+  z-index: 1;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   input {

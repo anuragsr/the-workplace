@@ -1,4 +1,10 @@
+.ctn-power-switch{ 
+  position: relative;
+  top: -50px;
+  left: -15px;
+}
 .power-switch {
+  transform: scale(.6);
   --color-invert: #ffffff;
   --width: 150px;    
   --height: 150px;

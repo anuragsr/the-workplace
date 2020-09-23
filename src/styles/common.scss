@@ -2,8 +2,7 @@
 html, body, 
 #ctn-bg, 
 #ctn-three, 
-#ctn-loader,
-#ctn-actions{
+#ctn-loader{
   @extend %fhw;
 }
 
@@ -43,8 +42,9 @@ body {
 .css3d{ 
   @include pa(0, 0);
   // opacity: 0;
-  &.lights-off{ opacity: .2; }
   &#smoke{
+    &.lights-off{ opacity: .2; }
+    transition: opacity .5s;
     height: 7px; width: 10px; 
     img{ @extend %fhw; opacity: .7; } 
   }
@@ -93,25 +93,27 @@ $pos: 40;
   }
   .content{
     padding: 0 #{$pos/2}px;
-    padding-top: 100px;
+    padding-top: 50px;
+    width: 750px;
+    margin: 0 auto;
     h1{ font-family: $ar-t; }
     p{ 
       text-align: left;
       font-size: 21px; 
-      width: 750px;
-      margin: 0 auto;
       margin-bottom: 20px;
-      &.para-bottom{
-        text-align: center;
-        img{ 
-          height: 20px;
-          vertical-align: middle;
-          position: relative;
-          top: -3px; left: -5px;
-        }
+      &:last-of-type{ margin-bottom: 0; }
+    }
+    div.para-bottom{
+      @extend %j-s-b;
+      img{ 
+        height: 20px;
+        vertical-align: middle;
+        position: relative;
+        top: -3px; left: -5px;
       }
     }
-    button{
+    button{      
+      margin-top: 50px;
       display: none;
       position: relative;
       background: transparent;
@@ -137,11 +139,11 @@ $pos: 40;
 }
 
 #ctn-actions{
-  @include pa(0, 0);
+  @include pa(0, "", "", 0);
   z-index: 1;
   display: flex; 
   justify-content: flex-end;
   align-items: flex-start;
-  padding: 50px 70px;
+  padding-top: 50px;
   .inner{ display: flex; flex-direction: column;}  
 }

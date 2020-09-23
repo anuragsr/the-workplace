@@ -4,6 +4,10 @@
   --circle: #9ea0be;
   --duration: 0.3s;
   --text: #9ea0be;
+  position: relative;
+  top: -70px;
+  left: 28px;
+  transform: scale(0.9);
   cursor: pointer;
   input {
       display: none;
