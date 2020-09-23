@@ -112,21 +112,37 @@
         </label>
       </div>
     </div>
-    <div id="ctn-ann">
-      <div id="ann1" class="ann">
-        <button>Ann1</button>
-        <p>About annotation 1</p>
-        <svg height="100" width="100">
-          <path d="M0 0 L50 50" stroke="#fff"/>
+    <div id="ctn-ann"></div>
+
+    <!-- <div id="ann1" class="ann">
+      <div class="inner">
+        <button data-status="off" data-ann="ann1">1</button>
+        <svg>          
+          <path d="M10 10 L30 30 L200 30 L200 120 L50 120 L30 100 L30 30z" />
+          <text x="52" y="50">A spacious table is always</text>
+          <text x="52" y="70">useful for keeping all </text>
+          <text x="52" y="90">your work tools in the same</text>
+          <text x="52" y="110">place, where you need them!</text>
         </svg>
       </div>
-      <div id="ann2" class="ann">
-        <button>Ann2</button>
-        <p>About annotation 2</p>
-        <svg height="100" width="100">
-          <path d="M0 0 L50 50" stroke="#fff"/>
-        </svg>
-      </div>
-    </div>
+    </div>-->
+    
+    <script id="tpl" type="text/template">         
+      {{@each(it.annArr) => val, index}}        
+        <div id="ann{{index}}" class="ann">
+          <div class="inner">
+            <button data-status="off" data-ann="ann{{index}}">{{index + 1}}</button>
+            <svg>          
+              <path d="M10 10 L30 30 L200 30 L200 120 L50 120 L30 100 L30 30z" />
+              <text x="52" y="50">{{val.line1}}</text>
+              <text x="52" y="70">{{val.line2}}</text>
+              <text x="52" y="90">{{val.line3}}</text>
+              <text x="52" y="110">{{val.line4}}</text>
+            </svg>
+          </div>
+        </div>
+      {{/each}}
+    </script>
+    
   </body>
 </html>

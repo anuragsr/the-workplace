@@ -118,8 +118,7 @@ export default class THREEStarter {
     this.addListeners()
     this.postProcess()
     
-    const WebFont = require('webfontloader')
-    WebFont.load({
+    require('webfontloader').load({
       custom: { families: ['ar-l', 'ar-t', 'clock'] },
       active: () => {
         l("All fonts have loaded.")
@@ -249,12 +248,7 @@ export default class THREEStarter {
     this.enableEnter()
     // this.enterRoom()
 
-    // this.addObjects()
-
-    const smoke1 = new CSS3DSprite($("#ann1")[0])
-    // const smoke1 = new CSS3DObject($("#ann1")[0])
-    smoke1.position.set(0, 50, -100)
-    this.introduceCSS3D(smoke1)
+    this.addObjects()
   }
   initGUI() {
     const guiObj = new ImplGUI()
@@ -379,7 +373,11 @@ export default class THREEStarter {
       this.controls.enabled = true
     })
   
-    $("button.item").on("click", this.enterRoom.bind(this))
+    $("button.item").on("click", () => {
+      this.enterRoom()      
+      // this.sound.play()
+      // this.mediaElement.play()
+    })
     
     $("#mute-check").on("change", function() {
       if($(this).prop('checked')) {
@@ -404,13 +402,9 @@ export default class THREEStarter {
       $("#smoke").toggleClass("lights-off")
     })    
     
-    $("#ann-check").on("change", function() {
-      if($(this).prop('checked')) {
-          l("ann CheckBox Selected")
-      } else {
-          l("ann CheckBox deselect")
-      }
-    })
+    $("#ann-check").on("change", e => this.toggleAllAnnotations($(e.target).prop('checked')))
+    
+    $(".ann button").on("click", this.toggleSingleAnnotation.bind(this))
   }
   resize() {
     let {
@@ -455,12 +449,49 @@ export default class THREEStarter {
       // this.mouseCamera.rotation.y = (-this.mouse.x * .5)      
     }
   }
+  toggleSingleAnnotation(e){
+    const id = `#${e.target.dataset.ann}`
+    , status = e.target.dataset.status
+    , path = $(`${id} path`)
+    , text = $(`${id} text`)
+    
+    if(status === "off"){
+      e.target.dataset.status = "on"
+      gsap.to(path, { 
+        strokeDashoffset: 0, fill: "rgba(16, 79, 63, 0.95)",
+        duration: 1
+      })
+      gsap.to($(".ann path").not(path), { 
+        strokeDashoffset: 564.852783203125, fill: "transparent",
+        duration: .5
+      })
+      gsap.to(text, { opacity: 1, duration: 1 })
+      gsap.to($(".ann text").not(text), { opacity: 0, duration: .5 })
+    } else {
+      e.target.dataset.status = "off"
+      gsap.to(path, { 
+        strokeDashoffset: 564.852783203125, fill: "transparent",
+        duration: .5
+      })
+      gsap.to(text, { opacity: 0, duration: .5 })
+    }
+  }
+  toggleAllAnnotations(value){
+    gsap.to(".ann path", { 
+      strokeDashoffset: 564.852783203125, fill: "transparent",
+      duration: .5 
+    })
+    gsap.to(".ann text", { opacity: 0, duration: .5 })
+
+    $(".ann button").each(function(){ this.dataset.status = "off" })
+    
+    if(!value) $(".ann").fadeOut()
+    else $(".ann").fadeIn()    
+  }
   enterRoom(){
     l("Start the show!")
       
     this.currentCamera = this.mouseCamera
-    // this.sound.play()
-    // this.mediaElement.play()
 
     gsap.to("#ctn-loader", {
       duration: .3, scale: 1.25, opacity: 0,
@@ -613,6 +644,11 @@ export default class THREEStarter {
         tableGroup.position.set(0, 0, -10)
 
         this.introduce(tableGroup)
+
+        const ann = new CSS3DSprite($("#ann0")[0])
+        ann.position.set(-55, 20, -95)
+        ann.scale.multiplyScalar(.18)
+        this.introduceCSS3D(ann)
       })
     }
     , addPosters = () => {
@@ -653,6 +689,11 @@ export default class THREEStarter {
           this.introduce(posterMesh)
         })
       })
+      
+      const ann = new CSS3DSprite($("#ann1")[0])
+      ann.position.set(-25, 75, -145)
+      ann.scale.multiplyScalar(.22)
+      this.introduceCSS3D(ann)
     }
     , addPC = () => {
       const obj = new OBJLoader()
@@ -721,6 +762,11 @@ export default class THREEStarter {
         km.rotation.set(0, -.08, 0)
         this.introduce(km)
       })
+      
+      const ann = new CSS3DSprite($("#ann2")[0])
+      ann.position.set(50, 36, -100)
+      ann.scale.multiplyScalar(.18)
+      this.introduceCSS3D(ann)
     }
     , addStationaryAndBeverage = () => {
       const snbGr = new THREE.Group()
@@ -996,18 +1042,18 @@ export default class THREEStarter {
       addPosters()
       // Adding PC
       addPC()
-      // Adding Notepad, Pen Stand, Coffee
-      addStationaryAndBeverage()
-      // Adding Router, Mobile, Statue
-      addRouterPhoneAndStatue()
-      // Adding Clock
-      addClock()
-      // Adding Door, AC
-      addDoorCouchAndAC()
-      // Adding Plants, Window
-      addPlantsAndWindow()
-      // Adding Chair, Guitar
-      addChairAndGuitar()
+      // // Adding Notepad, Pen Stand, Coffee
+      // addStationaryAndBeverage()
+      // // Adding Router, Mobile, Statue
+      // addRouterPhoneAndStatue()
+      // // Adding Clock
+      // addClock()
+      // // Adding Door, AC
+      // addDoorCouchAndAC()
+      // // Adding Plants, Window
+      // addPlantsAndWindow()
+      // // Adding Chair, Guitar
+      // addChairAndGuitar()
     })()
   }
   postProcess(){

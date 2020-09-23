@@ -148,22 +148,48 @@ $pos: 40;
 
 .ann{
   @include pa(0, 0);
-  font-family: $ar-l;
-  svg path{
-    stroke-dasharray: 70.71067810058594 70.71067810058594;
-    // stroke-dashoffset: 70.71067810058594;
-    transition: stroke-dashoffset .5s;
-  }
-  &:hover{
-    // width: 100px;
-    &:hover{ 
-      button{
-        background: green;
-      }
-      svg path{
-        stroke-dashoffset: 0;
-      }
+  z-index: 1;
+  font-family: $ar-t;
+  .inner{ position: relative; }
+  button{ 
+    @include pa(-15, -15);
+    @extend %j-c;
+    z-index: 1;    
+    cursor: pointer;
+    font-family: $ar-l;
+    height: 30px; width: 30px; 
+    background: rgba(16, 79, 63, 0.75);
+    border: 1px solid $w;
+    color: $w;
+    border-radius: 50%;
+    font-weight: bold;
+    transition: all .2s, transform 1ms;
+    &:focus{ outline: none!important; }
+    &:hover{
+      background: rgba(16, 79, 63, 1);
+      height: 34px; width: 34px;
+      left: -17px; top: -17px;
+      border: 1px solid #689cc5;
+      color: #689cc5;
     }
   }
-  &#ann2{ top: 100px; left: 200px; }
+  svg {
+    position: absolute;
+    top: 0; left: 0;
+    height: 150px;
+    width: 210px;
+    path{
+      stroke: #689cc5;
+      stroke-width: 2px;
+      // fill:  rgba(16, 79, 63, 0.95);
+      fill: transparent;
+      stroke-dasharray: 564.852783203125 564.852783203125;
+      stroke-dashoffset: 564.852783203125;
+    }
+    text{ 
+      font-size: 14px; 
+      fill: $w;
+      opacity: 0;
+    }
+  }
 }

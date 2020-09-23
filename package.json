@@ -28,6 +28,7 @@
         "jquery.waitforimages": "^2.4.0",
         "normalize.css": "^8.0.0",
         "patch-package": "^6.2.2",
+        "squirrelly": "^8.0.8",
         "stats.js": "^0.17.0",
         "three": "^0.113.2",
         "webfontloader": "^1.6.28"
