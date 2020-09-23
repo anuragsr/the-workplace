@@ -130,7 +130,10 @@ export default class THREEStarter {
           l('All images have loaded.')          
           
           // Adding Floor to give base idea
-          this.addFloor()          
+          this.addFloor()
+          
+          // Adding Sound
+          this.addSound()
         })
       }
     })
@@ -186,6 +189,26 @@ export default class THREEStarter {
     spotLight2.position.copy(lightPos2)
     // scene.add(spotLight2)
   }
+  addSound(){
+    // create an AudioListener and add it to the camera
+    const listener = new THREE.AudioListener()
+    , file = 'assets/sound/Toni Igy - Pentagramma.mp3'
+    this.mouseCamera.add(listener)
+
+    // create a global audio source
+    this.sound = new THREE.Audio(listener)
+
+    if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
+      new THREE.AudioLoader().load(file, buffer => {
+        this.sound.setLoop(true)
+        this.sound.setBuffer(buffer)
+        l("sound loaded")
+      })
+    } else {
+      this.mediaElement = new Audio(file)
+      this.sound.setMediaElementSource(this.mediaElement)
+    }
+  }
   addFloor() {
     const texLdr = new THREE.TextureLoader()    
     , { createMesh } = this
@@ -224,7 +247,14 @@ export default class THREEStarter {
     tl3D.seek(tl3D.duration())
     tlCSS.seek(tlCSS.duration())
     this.enableEnter()
-    this.addObjects()
+    // this.enterRoom()
+
+    // this.addObjects()
+
+    const smoke1 = new CSS3DSprite($("#ann1")[0])
+    // const smoke1 = new CSS3DObject($("#ann1")[0])
+    smoke1.position.set(0, 50, -100)
+    this.introduceCSS3D(smoke1)
   }
   initGUI() {
     const guiObj = new ImplGUI()
@@ -429,7 +459,9 @@ export default class THREEStarter {
     l("Start the show!")
       
     this.currentCamera = this.mouseCamera
-    
+    // this.sound.play()
+    // this.mediaElement.play()
+
     gsap.to("#ctn-loader", {
       duration: .3, scale: 1.25, opacity: 0,
       onComplete: function(){

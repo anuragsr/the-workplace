@@ -11,7 +11,10 @@
     <!-- Mobile header color for iOS Safari (supports black, black-translucent or default) -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default">    
     <style>
-      body{ background: rgb(0, 0, 0); }
+      body{ 
+        background: rgb(0, 0, 0); 
+        overflow: hidden; color: #fff;
+      }
       #ctn-bg{
         background: url(assets/nightbg3.jpg) no-repeat center;
         background-size: cover;
@@ -107,6 +110,22 @@
               <span></span>
           </div>          
         </label>
+      </div>
+    </div>
+    <div id="ctn-ann">
+      <div id="ann1" class="ann">
+        <button>Ann1</button>
+        <p>About annotation 1</p>
+        <svg height="100" width="100">
+          <path d="M0 0 L50 50" stroke="#fff"/>
+        </svg>
+      </div>
+      <div id="ann2" class="ann">
+        <button>Ann2</button>
+        <p>About annotation 2</p>
+        <svg height="100" width="100">
+          <path d="M0 0 L50 50" stroke="#fff"/>
+        </svg>
       </div>
     </div>
   </body>

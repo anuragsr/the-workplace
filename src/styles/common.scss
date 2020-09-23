@@ -6,13 +6,6 @@ html, body,
   @extend %fhw;
 }
 
-body {
-  // font-family: 'Courier New', Courier, monospace;
-  // text-align: center;
-  color: $w;
-  overflow: hidden;
-}
-
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -146,4 +139,31 @@ $pos: 40;
   align-items: flex-start;
   padding-top: 50px;
   .inner{ display: flex; flex-direction: column;}  
+}
+
+#ctn-ann{
+  @include pa(0, 0);
+  z-index: 3;
+}
+
+.ann{
+  @include pa(0, 0);
+  font-family: $ar-l;
+  svg path{
+    stroke-dasharray: 70.71067810058594 70.71067810058594;
+    // stroke-dashoffset: 70.71067810058594;
+    transition: stroke-dashoffset .5s;
+  }
+  &:hover{
+    // width: 100px;
+    &:hover{ 
+      button{
+        background: green;
+      }
+      svg path{
+        stroke-dashoffset: 0;
+      }
+    }
+  }
+  &#ann2{ top: 100px; left: 200px; }
 }
