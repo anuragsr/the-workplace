@@ -21,9 +21,11 @@
       path {
         animation: var(--name) var(--duration) ease forwards;
         &:nth-child(2) {
+          stroke: rgba($w, .5);
           stroke-dashoffset: 1px;
         }
         &:nth-child(3) {
+          stroke: rgba($w, .5);
           stroke-dashoffset: 1px;
         }
       }

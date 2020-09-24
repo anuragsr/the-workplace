@@ -1,32 +1,34 @@
 import $ from 'jquery'
 import 'jquery.waitForImages'
 import * as THREE from 'three'
+import * as Sqrl from 'squirrelly'
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls'
-import { CSS3DRenderer, CSS3DObject, CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
+import { CSS3DRenderer, CSS3DObject, CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader'
 
-import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js'
-import {BloomPass} from 'three/examples/jsm/postprocessing/BloomPass.js'
-import {FilmPass} from 'three/examples/jsm/postprocessing/FilmPass.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass'
+import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass'
 
 import gsap, { Linear } from 'gsap'
 import Stats from 'stats.js'
 
 import ImplGUI from './utils/gui'
-import * as dat from 'dat.gui'
 
 import THREELoader from './utils/loaders'
+import annArr from './utils/annotations'
 import { l, cl } from './utils/helpers'
 // cl(); l(THREE)
 let then = 0, count = 0
 , canMoveMouse = false
-, offset
+, offset, bgVolume = .7
 
 export default class THREEStarter {
   constructor(opts) {
@@ -132,19 +134,16 @@ export default class THREEStarter {
           this.addFloor()
           
           // Adding Sound
-          this.addSound()
+          this.addSounds()
         })
       }
     })
   }
   initScene(){
     const { 
-      ctn, w, h, camera, scene, 
+      ctn, w, h, camera, scene, origin, roomControls,
       renderer, renderer2, roomCamera, blurCamera,
-      mouseCamera,
-      cameraStartPos, origin, roomControls, stats,
-      spotLightMesh1, spotLight1, lightPos1,
-      spotLightMesh2, spotLight2, lightPos2,       
+      mouseCamera, cameraStartPos,
     } = this
 
     // Renderer settings
@@ -179,34 +178,49 @@ export default class THREEStarter {
 
     scene.add(new THREE.AmbientLight(0xffffff, .2))
 
-    // Spotlight and representational mesh
-    spotLightMesh1.position.copy(lightPos1)  
-    spotLight1.position.copy(lightPos1)
-    // scene.add(spotLight1)
-    
-    spotLightMesh2.position.copy(lightPos2)
-    spotLight2.position.copy(lightPos2)
-    // scene.add(spotLight2)
+    // Adding annotations
+    $("#ctn-ann").append(Sqrl.render($("#tpl").text(), { annArr }))
   }
-  addSound(){
+  addSounds(){
     // create an AudioListener and add it to the camera
     const listener = new THREE.AudioListener()
-    , file = 'assets/sound/Toni Igy - Pentagramma.mp3'
+    , audioLoader = new THREE.AudioLoader()
+    , file = 'assets/sound/bg.mp3'
+
     this.mouseCamera.add(listener)
 
     // create a global audio source
     this.sound = new THREE.Audio(listener)
-
     if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
-      new THREE.AudioLoader().load(file, buffer => {
+      audioLoader.load(file, buffer => {
         this.sound.setLoop(true)
         this.sound.setBuffer(buffer)
-        l("sound loaded")
       })
     } else {
       this.mediaElement = new Audio(file)
       this.sound.setMediaElementSource(this.mediaElement)
     }
+
+    this.openSound = new THREE.Audio(listener)
+    audioLoader.load('assets/sound/open.wav', buffer => {
+      this.openSound.setBuffer(buffer)
+    })
+
+    this.closeSound = new THREE.Audio(listener)
+    audioLoader.load('assets/sound/close.wav', buffer => {
+      this.closeSound.setBuffer(buffer)
+    })
+
+    this.lightsSound = new THREE.Audio(listener)
+    audioLoader.load('assets/sound/lights.wav', buffer => {
+      this.lightsSound.setBuffer(buffer)
+    })
+
+    this.buttonSound = new THREE.Audio(listener)
+    audioLoader.load('assets/sound/button.wav', buffer => {
+      this.buttonSound.setBuffer(buffer)
+    })
+
   }
   addFloor() {
     const texLdr = new THREE.TextureLoader()    
@@ -362,7 +376,7 @@ export default class THREEStarter {
   addListeners() {
     gsap.ticker.add(this.render.bind(this))
     window.addEventListener('resize', this.resize.bind(this), false)    
-    // window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
+    window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
 
     this.roomControls.addEventListener('lock', () => {
       this.currentCamera = this.roomCamera 
@@ -374,28 +388,36 @@ export default class THREEStarter {
     })
   
     $("button.item").on("click", () => {
-      this.enterRoom()      
-      // this.sound.play()
-      // this.mediaElement.play()
+      this.enterRoom()
+
+      this.sound.setVolume(bgVolume)
+      this.sound.play()
+      
+      this.mediaElement.volume = bgVolume
+      this.mediaElement.play()
     })
     
-    $("#mute-check").on("change", function() {
-      if($(this).prop('checked')) {
-          l("mute CheckBox Selected")
-      } else {
-          l("mute CheckBox deselect")
-      }
+    $("#mute-check").on("change", e => {
+      const volume = !$(e.target).prop('checked') ? 1 : 0
+      this.sound.setVolume(volume ? bgVolume: volume)
+      this.mediaElement.volume = volume ? bgVolume: volume
+      this.openSound.setVolume(volume)
+      this.closeSound.setVolume(volume)
+      this.lightsSound.setVolume(volume)
+      this.buttonSound.setVolume(volume)
     })
     
     $("#light-check").on("change", e => {
+      this.lightsSound.play()
+
       if(!$(e.target).prop('checked')){
         gsap.to(this.workLightArr.slice().reverse(), {
-          duration: .5, stagger: .2,
+          duration: .5, stagger: .4,
           intensity: 0
         })
       } else {
         gsap.to(this.workLightArr, {
-          duration: .5, stagger: .2,
+          duration: .5, stagger: .4,
           intensity: this.workLightIntensity
         })
       }
@@ -450,40 +472,54 @@ export default class THREEStarter {
     }
   }
   toggleSingleAnnotation(e){
-    const id = `#${e.target.dataset.ann}`
-    , status = e.target.dataset.status
+    const id = `#${e.currentTarget.dataset.ann}`
+    , status = e.currentTarget.dataset.status
     , path = $(`${id} path`)
     , text = $(`${id} text`)
     
+    // l("Event:", e)
+    // l("button:", e.currentTarget , "remaining:", $(".ann button").not(e.currentTarget))
+    // this.openSound.stop()
+    
     if(status === "off"){
-      e.target.dataset.status = "on"
+      this.openSound.play()
       gsap.to(path, { 
         strokeDashoffset: 0, fill: "rgba(16, 79, 63, 0.95)",
-        duration: 1
+        duration: 1, onComplete: () => {
+          e.currentTarget.dataset.status = "on"
+        }
       })
       gsap.to($(".ann path").not(path), { 
-        strokeDashoffset: 564.852783203125, fill: "transparent",
-        duration: .5
+        strokeDashoffset: 584.852783203125, 
+        fill: "transparent", duration: .5,
+        onComplete: () => {
+          $(".ann button").not(e.currentTarget)
+          .each(function(){ this.dataset.status = "off" })
+        }
       })
       gsap.to(text, { opacity: 1, duration: 1 })
       gsap.to($(".ann text").not(text), { opacity: 0, duration: .5 })
     } else {
-      e.target.dataset.status = "off"
+      this.closeSound.play()
       gsap.to(path, { 
-        strokeDashoffset: 564.852783203125, fill: "transparent",
-        duration: .5
+        strokeDashoffset: 584.852783203125, fill: "transparent",
+        duration: .5, onComplete: () => {
+          e.currentTarget.dataset.status = "off"
+        }
       })
       gsap.to(text, { opacity: 0, duration: .5 })
     }
   }
   toggleAllAnnotations(value){
+    this.buttonSound.play()
     gsap.to(".ann path", { 
-      strokeDashoffset: 564.852783203125, fill: "transparent",
-      duration: .5 
+      strokeDashoffset: 584.852783203125,
+      fill: "transparent", duration: .5, 
+      onComplete: () => {
+        $(".ann button").each(function(){ this.dataset.status = "off" })
+      }
     })
     gsap.to(".ann text", { opacity: 0, duration: .5 })
-
-    $(".ann button").each(function(){ this.dataset.status = "off" })
     
     if(!value) $(".ann").fadeOut()
     else $(".ann").fadeIn()    
@@ -646,7 +682,7 @@ export default class THREEStarter {
         this.introduce(tableGroup)
 
         const ann = new CSS3DSprite($("#ann0")[0])
-        ann.position.set(-55, 20, -95)
+        ann.position.set(15, 25, -90)
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
       })
@@ -764,7 +800,7 @@ export default class THREEStarter {
       })
       
       const ann = new CSS3DSprite($("#ann2")[0])
-      ann.position.set(50, 36, -100)
+      ann.position.set(45, 40, -100)
       ann.scale.multiplyScalar(.18)
       this.introduceCSS3D(ann)
     }
@@ -795,13 +831,67 @@ export default class THREEStarter {
         coffee.position.set(0, -19, 7)
         coffee.scale.multiplyScalar(.75)
         snbGr.add(coffee)
-        
-        // const smoke = new CSS3DSprite($("#smoke")[0])
+              
         const smoke = new CSS3DObject($("#smoke")[0])
         smoke.position.set(-24, 38, -111.5)
         this.introduceCSS3D(smoke)
       })
-                        
+
+      const ann = new CSS3DSprite($("#ann3")[0])
+      ann.position.set(-30, 30, -100)
+      ann.scale.multiplyScalar(.18)
+      this.introduceCSS3D(ann)
+    }
+    , addClock = () => {
+      const startTime = () => {
+        const today = new Date()
+        , wd = today.toLocaleDateString("en-US", { weekday: 'short' })
+        , h = today.getHours()
+        , m = checkTime(today.getMinutes())
+        , s = checkTime(today.getSeconds())
+        
+        $("#time").html(`${wd} ${h}:${m}:${s}`)
+        
+        setTimeout(startTime, 1000)
+      }
+      , checkTime = i => i < 10 ? `0${i}` : i
+    
+      const timeDiv = new CSS3DObject($("#time")[0])
+      timeDiv.rotation.set(0, .3, 0)
+      timeDiv.position.set(-50, 30, -100)
+      this.introduceCSS3D(timeDiv)
+  
+      const length = 16, width = 2  
+      , extrudeSettings = {
+        steps: 1,
+        depth: 0,
+        bevelEnabled: true,
+        bevelThickness: 1,
+        bevelSize: 1,
+        bevelOffset: 0,
+        bevelSegments: 4
+      }
+      , shape = new THREE.Shape()
+      .moveTo(0,0)
+      .lineTo(0, width)
+      .lineTo(length, width)
+      .lineTo(length, 0)
+      .lineTo(0, 0)
+      , mesh = createMesh(
+        new THREE.ExtrudeBufferGeometry( shape, extrudeSettings ),
+        new THREE.MeshPhongMaterial({ color: 0x000000 })
+      )
+      mesh.name = "Clock BG"
+      mesh.rotation.set(0, .3, 0)
+      mesh.position.set(-58.03, 28, -98.48)
+      this.introduce(mesh)
+
+      startTime()
+
+      const ann = new CSS3DSprite($("#ann4")[0])
+      ann.position.set(-48, 26, -95)
+      ann.scale.multiplyScalar(.18)
+      this.introduceCSS3D(ann)
     }
     , addRouterPhoneAndStatue = () => {
       gltf.load('assets/models/router/scene.gltf', obj => { 
@@ -851,52 +941,11 @@ export default class THREEStarter {
           })
         })
       })
-    }
-    , addClock = () => {
-      const startTime = () => {
-        const today = new Date()
-        , wd = today.toLocaleDateString("en-US", { weekday: 'short' })
-        , h = today.getHours()
-        , m = checkTime(today.getMinutes())
-        , s = checkTime(today.getSeconds())
-        
-        $("#time").html(`${wd} ${h}:${m}:${s}`)
-        
-        setTimeout(startTime, 1000)
-      }
-      , checkTime = i => i < 10 ? `0${i}` : i
-    
-      const timeDiv = new CSS3DObject($("#time")[0])
-      timeDiv.rotation.set(0, .3, 0)
-      timeDiv.position.set(-50, 30, -100)
-      this.introduceCSS3D(timeDiv)
-  
-      const length = 16, width = 2  
-      , extrudeSettings = {
-        steps: 1,
-        depth: 0,
-        bevelEnabled: true,
-        bevelThickness: 1,
-        bevelSize: 1,
-        bevelOffset: 0,
-        bevelSegments: 4
-      }
-      , shape = new THREE.Shape()
-      .moveTo(0,0)
-      .lineTo(0, width)
-      .lineTo(length, width)
-      .lineTo(length, 0)
-      .lineTo(0, 0)
-      , mesh = createMesh(
-        new THREE.ExtrudeBufferGeometry( shape, extrudeSettings ),
-        new THREE.MeshPhongMaterial({ color: 0x000000 })
-      )
-      mesh.name = "Clock BG"
-      mesh.rotation.set(0, .3, 0)
-      mesh.position.set(-58.03, 28, -98.48)
-      this.introduce(mesh)
-
-      startTime()
+      
+      const ann = new CSS3DSprite($("#ann5")[0])
+      ann.position.set(-55, 45, -90)
+      ann.scale.multiplyScalar(.18)
+      this.introduceCSS3D(ann)
     }
     , addDoorCouchAndAC = () => {
       fbx.load('assets/models/door/Door_Component_BI3.fbx', group => { 
@@ -906,6 +955,11 @@ export default class THREEStarter {
         door.rotation.set(0, 1.26, 0)
         door.name = "Door"
         this.introduce(door)
+
+        const ann = new CSS3DSprite($("#ann6")[0])
+        ann.position.set(-140, 60, -60)
+        ann.scale.multiplyScalar(.18)
+        this.introduceCSS3D(ann)
       })
       gltf.load('assets/models/ac/scene.gltf', obj => { 
         const ac = obj.scene 
@@ -915,6 +969,11 @@ export default class THREEStarter {
         ac.position.set(-117.58, 72, -84.38)
         ac.rotation.set(0, .92, 0)
         this.introduce(ac)
+        
+        const ann = new CSS3DSprite($("#ann7")[0])
+        ann.position.set(-100, 80, -85)
+        ann.scale.multiplyScalar(.18)
+        this.introduceCSS3D(ann)
       }) 
       tds.load('assets/models/sofa/the chair modeling.3ds', object => {
         const couch = object
@@ -934,7 +993,13 @@ export default class THREEStarter {
           }
         })
         this.introduce(couch)
+        
+        const ann = new CSS3DSprite($("#ann8")[0])
+        ann.position.set(-85, 35, -80)
+        ann.scale.multiplyScalar(.18)
+        this.introduceCSS3D(ann)
       })
+      
     }
     , addPlantsAndWindow = () => {
       fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => { 
@@ -951,6 +1016,11 @@ export default class THREEStarter {
         plant2.position.set(84.10, 0, -108)
         plant2.rotation.set(-1.57, 0, 2.74)
         this.introduce(plant2)
+
+        const ann = new CSS3DSprite($("#ann9")[0])
+        ann.position.set(80, 20, -85)
+        ann.scale.multiplyScalar(.18)
+        this.introduceCSS3D(ann)
       })
 
       const windowGroup = new THREE.Group()
@@ -959,6 +1029,11 @@ export default class THREEStarter {
       windowGroup.rotation.set(0, -1.26, 0)
       windowGroup.scale.multiplyScalar(1.25)
       this.introduce(windowGroup)
+
+      const ann = new CSS3DSprite($("#ann10")[0])
+      ann.position.set(135, 60, -60)
+      ann.scale.multiplyScalar(.18)
+      this.introduceCSS3D(ann)
       
       texLdr.load('assets/textures/window.jpg', windowTex => { 
         const winBg = createMesh(
@@ -995,6 +1070,11 @@ export default class THREEStarter {
           }
         })
         this.introduce(chair)
+
+        const ann = new CSS3DSprite($("#ann11")[0])
+        ann.position.set(45, 20, -80)
+        ann.scale.multiplyScalar(.18)
+        this.introduceCSS3D(ann)
       })
       mtl.load("assets/models/guitar/Miramondo_Hot_Shot_Stool.mtl", materials => {
         materials.preload()
@@ -1022,6 +1102,11 @@ export default class THREEStarter {
           guitar.rotation.set(-1.7, .1, 2)
           guitar.position.set(110, 0, -85)
           this.introduce(guitar)
+
+          const ann = new CSS3DSprite($("#ann12")[0])
+          ann.position.set(100, 30, -60)
+          ann.scale.multiplyScalar(.18)
+          this.introduceCSS3D(ann)
         })
       })
     }
@@ -1042,18 +1127,18 @@ export default class THREEStarter {
       addPosters()
       // Adding PC
       addPC()
-      // // Adding Notepad, Pen Stand, Coffee
-      // addStationaryAndBeverage()
-      // // Adding Router, Mobile, Statue
-      // addRouterPhoneAndStatue()
-      // // Adding Clock
-      // addClock()
-      // // Adding Door, AC
-      // addDoorCouchAndAC()
-      // // Adding Plants, Window
-      // addPlantsAndWindow()
-      // // Adding Chair, Guitar
-      // addChairAndGuitar()
+      // Adding Notepad, Pen Stand, Coffee
+      addStationaryAndBeverage()
+      // Adding Router, Mobile, Statue
+      addRouterPhoneAndStatue()
+      // Adding Clock
+      addClock()
+      // Adding Door, AC
+      addDoorCouchAndAC()
+      // Adding Plants, Window
+      addPlantsAndWindow()
+      // Adding Chair, Guitar
+      addChairAndGuitar()
     })()
   }
   postProcess(){
