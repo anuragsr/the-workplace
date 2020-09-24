@@ -15,3 +15,9 @@ $ar-l: 'ar-l';
   font-family: $ar-l;
   src: url('../fonts/Arquitecta W04 Lt.ttf') format('truetype');
 }
+
+$fl-r: 'fl-r';
+@font-face {
+  font-family: $fl-r;
+  src: url('../fonts/Flamenco-Regular.ttf') format('truetype');
+}

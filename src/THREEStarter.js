@@ -114,6 +114,7 @@ export default class THREEStarter {
     let show = false
     // Initialize the scene
     this.initScene()
+    // Uncomment below 2 lines for testing
     show = true
     this.initGUI()
     this.toggleHelpers(show)
@@ -179,6 +180,7 @@ export default class THREEStarter {
     scene.add(new THREE.AmbientLight(0xffffff, .2))
 
     // Adding annotations
+    l("Annotations:", annArr.length)
     $("#ctn-ann").append(Sqrl.render($("#tpl").text(), { annArr }))
   }
   addSounds(){
@@ -256,12 +258,13 @@ export default class THREEStarter {
     tlCSS
     .to("#ctn-bg", { duration, scale: 1.15 }, "lb0")
     .to(".content .item", { duration: 2.5, opacity: 1, stagger }, "lb0")
-  
+
+    // Uncomment below 3 lines for testing    
     tl3D.seek(tl3D.duration())
     tlCSS.seek(tlCSS.duration())
     this.enableEnter()
-    // this.enterRoom()
 
+    this.toggleAllAnnotations(false)
     this.addObjects()
   }
   initGUI() {
@@ -392,7 +395,7 @@ export default class THREEStarter {
 
       this.sound.setVolume(bgVolume)
       this.sound.play()
-      
+
       this.mediaElement.volume = bgVolume
       this.mediaElement.play()
     })
@@ -461,10 +464,10 @@ export default class THREEStarter {
 
       // Code for camera move
       // l(this.mouse)
-      offset = -.2
+      offset = -.1
       gsap.to(this.mouseCamera.rotation, {
         duration: .5, delay: .1,
-        x: (this.mouse.y * .03) + offset,
+        x: (this.mouse.y * .01) + offset,
         y: (-this.mouse.x * .5)
       })
       // this.mouseCamera.rotation.x = (this.mouse.y * .03) + offset
@@ -479,12 +482,11 @@ export default class THREEStarter {
     
     // l("Event:", e)
     // l("button:", e.currentTarget , "remaining:", $(".ann button").not(e.currentTarget))
-    // this.openSound.stop()
     
     if(status === "off"){
       this.openSound.play()
       gsap.to(path, { 
-        strokeDashoffset: 0, fill: "rgba(16, 79, 63, 0.95)",
+        strokeDashoffset: 0, fill: "rgba(32, 160, 128, .95)",
         duration: 1, onComplete: () => {
           e.currentTarget.dataset.status = "on"
         }
@@ -522,12 +524,13 @@ export default class THREEStarter {
     gsap.to(".ann text", { opacity: 0, duration: .5 })
     
     if(!value) $(".ann").fadeOut()
-    else $(".ann").fadeIn()    
+    else $(".ann").fadeIn() 
   }
   enterRoom(){
     l("Start the show!")
       
     this.currentCamera = this.mouseCamera
+    // window.currentCamera = this.currentCamera
 
     gsap.to("#ctn-loader", {
       duration: .3, scale: 1.25, opacity: 0,
@@ -540,13 +543,16 @@ export default class THREEStarter {
     new gsap.timeline({
       onComplete: () => {
         l("Start mouse following!")
-        canMoveMouse = true
+        setTimeout(() => {
+          canMoveMouse = true
+          this.toggleAllAnnotations(canMoveMouse)
+        }, 1000)
       }
     })
     .to("#ctn-bg", { duration: 1.5, scale: 1.25, opacity: 0 }, "lb0")
     .to("#ctn-actions", { duration: 1.5, opacity: 1 }, "lb0")
-    .to(this.currentCamera.position, { duration: 1.5, y: 70, z: 30 }, "lb0")
-    .to(this.currentCamera.rotation, { duration: 1.5, x: -.35 }, "lb0")
+    .to(this.currentCamera.position, { duration: 1.5, y: 50, z: 35 }, "lb0")
+    .to(this.currentCamera.rotation, { duration: 1.5, x: -.1 }, "lb0")
   }
   enableEnter(){
     $("#ctn-loader .load").fadeOut()
@@ -682,7 +688,7 @@ export default class THREEStarter {
         this.introduce(tableGroup)
 
         const ann = new CSS3DSprite($("#ann0")[0])
-        ann.position.set(15, 25, -90)
+        ann.position.set(15, 30, -90)
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
       })
@@ -727,7 +733,7 @@ export default class THREEStarter {
       })
       
       const ann = new CSS3DSprite($("#ann1")[0])
-      ann.position.set(-25, 75, -145)
+      ann.position.set(-5, 75, -125)
       ann.scale.multiplyScalar(.22)
       this.introduceCSS3D(ann)
     }
@@ -832,13 +838,13 @@ export default class THREEStarter {
         coffee.scale.multiplyScalar(.75)
         snbGr.add(coffee)
               
-        const smoke = new CSS3DObject($("#smoke")[0])
-        smoke.position.set(-24, 38, -111.5)
+        const smoke = new CSS3DSprite($("#smoke")[0])
+        smoke.position.set(-23.75, 39, -111.5)
         this.introduceCSS3D(smoke)
       })
 
       const ann = new CSS3DSprite($("#ann3")[0])
-      ann.position.set(-30, 30, -100)
+      ann.position.set(-30, 26, -100)
       ann.scale.multiplyScalar(.18)
       this.introduceCSS3D(ann)
     }
@@ -889,7 +895,7 @@ export default class THREEStarter {
       startTime()
 
       const ann = new CSS3DSprite($("#ann4")[0])
-      ann.position.set(-48, 26, -95)
+      ann.position.set(-48, 25, -95)
       ann.scale.multiplyScalar(.18)
       this.introduceCSS3D(ann)
     }
@@ -915,6 +921,11 @@ export default class THREEStarter {
         screenPh.position.set(-2, 27.5, -108)
         screenPh.scale.multiplyScalar(.7)
         this.introduceCSS3D(screenPh)
+        
+        const ann = new CSS3DSprite($("#ann13")[0])
+        ann.position.set(-4, 28, -80)
+        ann.scale.multiplyScalar(.16)
+        this.introduceCSS3D(ann)
       })
       mtl.load("assets/models/showpiece/12335_The_Thinker_v3_l2.mtl", materials => {
         materials.preload()
@@ -939,13 +950,13 @@ export default class THREEStarter {
             z: "+=" + 2 * Math.PI, repeat: -1,
             duration: 20, ease: Linear.easeNone
           })
+
+          const ann = new CSS3DSprite($("#ann5")[0])
+          ann.position.set(-50, 45, -90)
+          ann.scale.multiplyScalar(.18)
+          this.introduceCSS3D(ann)
         })
-      })
-      
-      const ann = new CSS3DSprite($("#ann5")[0])
-      ann.position.set(-55, 45, -90)
-      ann.scale.multiplyScalar(.18)
-      this.introduceCSS3D(ann)
+      })      
     }
     , addDoorCouchAndAC = () => {
       fbx.load('assets/models/door/Door_Component_BI3.fbx', group => { 
@@ -957,7 +968,7 @@ export default class THREEStarter {
         this.introduce(door)
 
         const ann = new CSS3DSprite($("#ann6")[0])
-        ann.position.set(-140, 60, -60)
+        ann.position.set(-130, 60, -65)
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
       })
@@ -1018,8 +1029,8 @@ export default class THREEStarter {
         this.introduce(plant2)
 
         const ann = new CSS3DSprite($("#ann9")[0])
-        ann.position.set(80, 20, -85)
-        ann.scale.multiplyScalar(.18)
+        ann.position.set(70, 30, -65)
+        ann.scale.multiplyScalar(.16)
         this.introduceCSS3D(ann)
       })
 
@@ -1072,7 +1083,7 @@ export default class THREEStarter {
         this.introduce(chair)
 
         const ann = new CSS3DSprite($("#ann11")[0])
-        ann.position.set(45, 20, -80)
+        ann.position.set(55, 30, -80)
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
       })
@@ -1104,7 +1115,7 @@ export default class THREEStarter {
           this.introduce(guitar)
 
           const ann = new CSS3DSprite($("#ann12")[0])
-          ann.position.set(100, 30, -60)
+          ann.position.set(90, 40, -60)
           ann.scale.multiplyScalar(.18)
           this.introduceCSS3D(ann)
         })

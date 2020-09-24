@@ -20,7 +20,7 @@
         background-size: cover;
         opacity: 0;
       }
-      #ctn-css3D{ display: none; }
+      #ctn-css3D, #ctn-ann{ display: none; }
       #ctn-loader .load, #ctn-loader .item, #ctn-actions{ opacity: 0; }
       .dg.ac{ z-index: 3!important; }
 
@@ -51,10 +51,11 @@
           <div>
             <p><img src="assets/chrome-tr.png" alt=""/>Works best in Google Chrome</p> 
             <p><img src="assets/mouse-tr.png" alt=""/>Move mouse to navigate the scene</p>
+            <p><img src="assets/setting-tr.png" alt=""/>Control the scene with actions on the right</p>
           </div>
           <div>
-            <p><img src="assets/headphone-tr.png" alt=""/>Please use earphones for the full experience</p> 
-            <p><img src="assets/setting-tr.png" alt=""/>Control the scene with actions on the right</p>
+            <p><img src="assets/headphone-tr.png" alt=""/>Turn on sound for the full experience</p> 
+            <p><img src="assets/info-tr.png" alt=""/>Click on the info buttons for more information</p>
           </div>
         </div>
         <button class="item">Enter</button>
@@ -136,17 +137,17 @@
             {{@if(val.up)}}
               <svg class="up">
                 <path d="M210 140 L190 120 L10 120 L10 30 L170 30 L190 50 L190 120z" />
-                <text x="24" y="50">{{val.line1}}</text>
-                <text x="24" y="70">{{val.line2}}</text>
-                <text x="24" y="90">{{val.line3}}</text>
-                <text x="24" y="110">{{val.line4}}</text>
+                <text x="20" y="50">{{val.line1}}</text>
+                <text x="20" y="70">{{val.line2}}</text>
+                <text x="20" y="90">{{val.line3}}</text>
+                <text x="20" y="110">{{val.line4}}</text>
               </svg>
             {{#else}}        
               <svg>
                 <path d="M10 10 L30 30 L210 30 L210 120 L50 120 L30 100 L30 30z" />
-                <text x="52" y="50">{{val.line1}}</text>
-                <text x="52" y="70">{{val.line2}}</text>
-                <text x="52" y="90">{{val.line3}}</text>
+                <text x="40" y="50">{{val.line1}}</text>
+                <text x="40" y="70">{{val.line2}}</text>
+                <text x="40" y="90">{{val.line3}}</text>
                 <text x="52" y="110">{{val.line4}}</text>
               </svg>
             {{/if}}
