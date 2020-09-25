@@ -267,6 +267,9 @@ export default class THREEStarter {
 
     this.toggleAllAnnotations(false)
     this.addObjects()
+    setTimeout(() => {
+      this.enableEnter()
+    }, 60 * 1000)
   }
   initGUI() {
     const guiObj = new ImplGUI()

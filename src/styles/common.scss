@@ -26,12 +26,17 @@ html, body,
 #ctn-three{
   position: relative;
   z-index: 1;
-  .canvas-webGL{ @include pa(0, 0); }
-  .canvas-css3D{ 
-    @include pa(0, 0); 
-    box-shadow: inset 0px 3px 10px 1px rgba($b, .7);
-  }
 }
+
+// .canvas-webGL{ 
+//   @include pa(0, 0); 
+//   z-index: 0;
+// }
+// .canvas-css3D{ 
+//   @include pa(0, 0); 
+//   z-index: 1;
+//   box-shadow: inset 0px 3px 10px 1px rgba($b, .7);
+// }
 
 .loading{ opacity: 0!important; }
 
