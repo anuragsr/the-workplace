@@ -14,7 +14,7 @@ const annArr =
     line4: "keep you charged up.",
   },
   { 
-    line1: "A powerful CPU with a ",
+    line1: "A powerful CPU with a",
     line2: "multi-monitor setup gives",
     line3: "you increased productivity",
     line4: "and lets you multitask.",
@@ -23,7 +23,7 @@ const annArr =
   { 
     line1: "Starting the day with a hot",
     line2: "cup of coffee, and a notebook",
-    line3: "to organise your daily tasks",
+    line3: "to organize your daily tasks",
     line4: "makes you alert & efficient.",
   },     
   { 
@@ -41,12 +41,12 @@ const annArr =
   },
   { 
     line1: "Of course, when you really",
-    line2: "need to take break, or step",
+    line2: "need to take a break, or step",
     line3: "outside, the door is always",
     line4: "open. You're the boss! :)",
   },
   { 
-    line1: "The workspace temperature ",
+    line1: "The workspace temperature",
     line2: "must be set at a comfortable",
     line3: "level. An airconditioner serves",
     line4: "an essential purpose in this.",
@@ -92,7 +92,7 @@ const annArr =
     // up: true
   },                  
   { 
-    line1: "A mersmerizing work of art is",
+    line1: "A mesmerizing work of art is",
     line2: "very inspiring for one to",
     line3: "contribute great things and",
     line4: "push their limits positively!",

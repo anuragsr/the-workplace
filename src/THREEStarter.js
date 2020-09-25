@@ -28,6 +28,7 @@ import { l, cl } from './utils/helpers'
 // cl(); l(THREE)
 let then = 0, count = 0
 , canMoveMouse = false
+, isDefaultCameraView = true
 , offset, bgVolume = .7
 
 export default class THREEStarter {
@@ -103,7 +104,7 @@ export default class THREEStarter {
     this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 
     this.mouse = new THREE.Vector2()
-    this.enableInspector()
+    // this.enableInspector()
   }
   enableInspector(){
     // For THREE Inspector    
@@ -115,8 +116,8 @@ export default class THREEStarter {
     // Initialize the scene
     this.initScene()
     // Uncomment below 2 lines for testing
-    show = true
-    this.initGUI()
+    // show = true
+    // this.initGUI()
     this.toggleHelpers(show)
     this.addListeners()
     this.postProcess()
@@ -260,9 +261,9 @@ export default class THREEStarter {
     .to(".content .item", { duration: 2.5, opacity: 1, stagger }, "lb0")
 
     // Uncomment below 3 lines for testing    
-    tl3D.seek(tl3D.duration())
-    tlCSS.seek(tlCSS.duration())
-    this.enableEnter()
+    // tl3D.seek(tl3D.duration())
+    // tlCSS.seek(tlCSS.duration())
+    // this.enableEnter()
 
     this.toggleAllAnnotations(false)
     this.addObjects()
@@ -463,15 +464,27 @@ export default class THREEStarter {
       // (-1 to +1) for both components
       this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-      // Code for camera move
       // l(this.mouse)
-      offset = -.1
-      gsap.to(this.mouseCamera.rotation, {
-        duration: .5, delay: .1,
-        x: (this.mouse.y * .01) + offset,
-        y: (-this.mouse.x * .5)
-      })
+
+      // Code for normal camera move
+      if(isDefaultCameraView){
+        offset = -.1
+        gsap.to(this.mouseCamera.rotation, {
+          duration: .5, delay: .1,
+          x: (this.mouse.y * .01) + offset,
+          y: (-this.mouse.x * .5)
+        })
+      }
+      // Code for top camera move
+      else {
+        offset = .3
+        gsap.to(this.mouseCamera.rotation, {
+          duration: .5, delay: .1,
+          x: -Math.PI / 2 + (this.mouse.y * .01) + offset,
+          y: (-this.mouse.x * .2)
+        })
+      }
+
       // this.mouseCamera.rotation.x = (this.mouse.y * .03) + offset
       // this.mouseCamera.rotation.y = (-this.mouse.x * .5)      
     }
@@ -529,14 +542,22 @@ export default class THREEStarter {
     else $(".ann").fadeIn() 
   }
   toggleCameraView(value){
+    isDefaultCameraView = value
+    canMoveMouse = false
+    
+    const duration = 1.5
+    , tl = new gsap.timeline({ onComplete: () => canMoveMouse = true })
+
     if(value){
-      new gsap.timeline()
-      .to(this.currentCamera.position, { duration: 1.5, y: 50, z: 35 }, "lb0")
-      .to(this.currentCamera.rotation, { duration: 1.5, x: -.1 }, "lb0")
+      tl.to(this.currentCamera.position, { duration, y: 50, z: 35 }, "lb0")
+      .to(this.currentCamera.rotation, { duration, x: -.1 }, "lb0")
+      .to(".ann", { duration, opacity: 1 }, "lb0")
+      .to("#ctn-bg", { duration, opacity: 0 }, "lb0")
     } else {
-      new gsap.timeline()
-      .to(this.currentCamera.position, { duration: 1.5, y: 100, z: 0 }, "lb0")
-      .to(this.currentCamera.rotation, { duration: 1.5, x: -Math.PI / 2 }, "lb0")
+      tl.to(this.currentCamera.position, { duration, x: 0, y: 250, z: -40 }, "lb0")
+      .to(this.currentCamera.rotation, { duration, x: -1.35, y: 0, z: 0 }, "lb0")
+      .to(".ann", { duration: duration / 3, opacity: 0 }, "lb0")
+      .to("#ctn-bg", { duration, opacity: 1 }, "lb0")
     }
   }
   enterRoom(){
@@ -585,7 +606,7 @@ export default class THREEStarter {
       , ceiling = createMesh(
         new THREE.CircleGeometry( 150, 64 ),
         new THREE.MeshPhongMaterial({ 
-          color: 0xffffff, side: THREE.BackSide,
+          color: 0x9ea0be, side: THREE.BackSide,
           // transparent: true, opacity: 0
         })
       )
@@ -737,7 +758,7 @@ export default class THREEStarter {
           // l(currTex, tex, idx)
           tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
           const posterMesh = createMesh(
-            geo, new THREE.MeshPhongMaterial({ map: tex })
+            geo, new THREE.MeshPhongMaterial({ map: tex, shininess: 0 })
           )
           posterMesh.scale.set(1, tex.image.height / tex.image.width, 1)
           posterMesh.scale.multiplyScalar(m)
