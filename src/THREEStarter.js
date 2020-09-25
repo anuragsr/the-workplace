@@ -551,8 +551,8 @@ export default class THREEStarter {
     if(value){
       tl.to(this.currentCamera.position, { duration, y: 50, z: 35 }, "lb0")
       .to(this.currentCamera.rotation, { duration, x: -.1 }, "lb0")
-      .to(".ann", { duration, opacity: 1 }, "lb0")
       .to("#ctn-bg", { duration, opacity: 0 }, "lb0")
+      .to(".ann", { duration: duration / 3, opacity: 1 })
     } else {
       tl.to(this.currentCamera.position, { duration, x: 0, y: 250, z: -40 }, "lb0")
       .to(this.currentCamera.rotation, { duration, x: -1.35, y: 0, z: 0 }, "lb0")
@@ -584,7 +584,8 @@ export default class THREEStarter {
       }
     })
     .to("#ctn-bg", { duration: 1.5, scale: 1.25, opacity: 0 }, "lb0")
-    .to("#ctn-actions", { duration: 1.5, opacity: 1 }, "lb0")
+    .to("#ctn-actions", { duration: 1.5, right: -45 }, "lb0")
+    .to("#ctn-about", { duration: 1.5, top: 0 }, "lb0")
     .to(this.currentCamera.position, { duration: 1.5, y: 50, z: 35 }, "lb0")
     .to(this.currentCamera.rotation, { duration: 1.5, x: -.1 }, "lb0")
   }
@@ -606,7 +607,8 @@ export default class THREEStarter {
       , ceiling = createMesh(
         new THREE.CircleGeometry( 150, 64 ),
         new THREE.MeshPhongMaterial({ 
-          color: 0x9ea0be, side: THREE.BackSide,
+          color: 0xeacde7,
+          side: THREE.BackSide,
           // transparent: true, opacity: 0
         })
       )

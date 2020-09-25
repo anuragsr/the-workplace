@@ -1,0 +1,28 @@
+#ctn-about{
+  @include pa(-150, 0);
+  // top: 0;
+  z-index: 1;
+  // width: 170px;
+  font-family: $ar-l;
+  background: rgba($b, .3);
+  padding: 15px;
+  border-bottom-right-radius: 5px;
+  h2{ margin: 6px 0; }
+  div{
+    line-height: 1.6;
+    font-size: 18px;
+    margin-bottom: 10px;
+    a{ color: $w; &:hover{ text-decoration: none; } }
+    & ~ a{ text-decoration: none; }
+  }
+  img{ 
+    height: 25px; 
+    margin-right: 10px;
+    opacity: .8;
+    transition: all .3s;
+    &:hover{
+      opacity: 1;
+      transform: rotate(10deg) scale(1.25);
+    }
+  }
+}

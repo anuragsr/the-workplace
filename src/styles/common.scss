@@ -27,7 +27,10 @@ html, body,
   position: relative;
   z-index: 1;
   .canvas-webGL{ @include pa(0, 0); }
-  .canvas-css3D{ @include pa(0, 0); }
+  .canvas-css3D{ 
+    @include pa(0, 0); 
+    box-shadow: inset 0px 3px 10px 1px rgba($b, .7);
+  }
 }
 
 .loading{ opacity: 0!important; }
@@ -133,7 +136,7 @@ $pos: 40;
 }
 
 #ctn-actions{
-  @include pa(-10, "", "", -45);
+  @include pa(-10, "", "", -150);
   z-index: 1;
   display: flex; 
   align-items: flex-start;
@@ -155,10 +158,10 @@ $pos: 40;
   }
 }
 
-#ctn-ann{
-  @include pa(0, 0);
-  z-index: 3;
-}
+// #ctn-ann{
+//   @include pa(0, 0);
+//   z-index: 3;
+// }
 
 .ann{
   @include pa(0, 0);

@@ -21,7 +21,10 @@
         opacity: 0;
       }
       #ctn-css3D, #ctn-ann{ display: none; }
-      #ctn-loader .load, #ctn-loader .item, #ctn-actions{ opacity: 0; }
+      #ctn-loader .load, 
+      #ctn-loader .item{ 
+        opacity: 0; 
+      }
       .dg.ac{ z-index: 3!important; }
 
     </style>
@@ -133,6 +136,30 @@
       </div>
     </div>
 
+    <div id="ctn-about">
+      <h2>The Workspace</h2>
+      <div>
+        by <a href="http://envisagecyberart.in" target="_blank">
+          Anurag Srivastava
+        </a>
+      </div>
+      <a href="https://www.upwork.com/o/profiles/users/~01d929751d145a05ea/" target="_blank">
+        <img src="assets/upwork.png" alt="">
+      </a>
+      <a href="https://www.guru.com/freelancers/anurag-srivastava-27" target="_blank">
+        <img src="assets/guru.png" alt="">
+      </a>
+      <a href="mailto:anurag.131092@gmail.com&Subject=New Work Proposal">
+        <img src="assets/gmail.png" alt="">
+      </a>
+      <a href="https://stackoverflow.com/users/7867822/anurag-srivastava" target="_blank">
+        <img src="assets/so.png" alt="">
+      </a>
+      <a href="https://github.com/anuragsr" target="_blank">
+        <img src="assets/github.png" alt="">
+      </a>
+    </div>
+
     <div id="ctn-ann"></div>
 
     <!-- <div id="ann1" class="ann">
@@ -148,7 +175,7 @@
       </div>
     </div>-->
     
-    <script id="tpl" type="text/template">         
+    <script id="tpl" type="text/template">
       {{@each(it.annArr) => val, index}}        
         <div id="ann{{index}}" class="ann">
           <div class="inner">
