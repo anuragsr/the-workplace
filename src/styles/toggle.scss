@@ -1,3 +1,9 @@
+.ctn-switch{
+  .ann-title{
+    top: -20px;
+    left: 24px;
+  }
+}
 .switch {
   --line: #505162;
   --dot: #f7f8ff;
@@ -78,5 +84,32 @@
               }
           }
       }
+  }
+}
+
+.ctn-view{
+  position: relative;
+  left: 30px;
+  cursor: pointer;
+  .ctn-img{
+    position: relative;
+    height: 50px;
+    width: 55px;
+    img{ 
+      @include pa(0, 0);
+      @extend %fw;
+      transition: transform .3s;
+      transform-origin: 51% 53%;
+    }
+  }
+  #view-check{
+    display: none;
+    &:checked + div img.second{
+      transform: rotate(180deg);
+    }
+  }  
+  .ann-title{  
+    top: 10px;
+    left: 12px;
   }
 }

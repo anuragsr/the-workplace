@@ -28,7 +28,9 @@
   </head>
   <body class="noselect">
     <div id="ctn-bg"></div>
+    
     <div id="ctn-three"></div>
+    
     <div id="ctn-loader">
       <div class="load">
         <img src="assets/Blocks-1s-200px2.gif" alt="">
@@ -61,6 +63,7 @@
         <button class="item">Enter</button>
       </div>
     </div>
+    
     <div id="ctn-css3D">
       <img class="css3d loading" id="monitorPr" src="assets/textures/website.gif" alt=""/>
       <img class="css3d loading" id="monitorSc1" src="assets/textures/coding.gif" alt=""/>
@@ -69,19 +72,23 @@
       <img class="css3d loading" id="phone" src="assets/textures/phone.gif" alt=""/>
       <div class="css3d loading" id="time">Sat 11:45:07</div>
     </div>
+
     <div id="ctn-actions">
       <div class="inner">
-        <label class="volume" title="Toggle Sound">
-          <input id="mute-check" type="checkbox">
-          <svg viewBox="0 0 108 96">
+        <div class="ctn-volume">
+          <label class="volume">
+            <input id="mute-check" type="checkbox">
+            <svg viewBox="0 0 108 96">
               <path d="M7,28 L35,28 L35,28 L59,8 L59,88 L35,68 L7,68 C4.790861,68 3,66.209139 3,64 L3,32 C3,29.790861 4.790861,28 7,28 Z"></path>
               <path d="M79,62 C83,57.3333333 85,52.6666667 85,48 C85,43.3333333 83,38.6666667 79,34 L49,3"></path>
               <path d="M95,69 C101.666667,61.6666667 105,54.3333333 105,47 C105,39.6666667 101.666667,32.3333333 95,25 L75.5,6 L49,33"></path>
-          </svg>          
-        </label>
+            </svg>
+          </label>
+          <div class="ann-title">Sound</div>
+        </div>
         
         <div class="ctn-power-switch">
-          <div class="power-switch" title="Toggle Lights">
+          <div class="power-switch">
             <input id="light-check" type="checkbox" checked/>
             <div class="button">
               <svg class="power-off">
@@ -92,7 +99,7 @@
                 <use xlink:href="#line" class="line" />
                 <use xlink:href="#circle" class="circle" />
               </svg>
-            </div>            
+            </div>
           </div>
           
           <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -103,16 +110,29 @@
               <circle cx="75" cy="80" r="35"/>
             </symbol>
           </svg>
+
+          <div class="ann-title">Lights</div>
         </div>
 
-        <label class="switch" title="Toggle Annotations">
-          <input id="ann-check" type="checkbox" checked>
-          <div>
-              <span></span>
-          </div>          
+        <div class="ctn-switch">
+          <label class="switch">
+            <input id="ann-check" type="checkbox" checked>
+            <div><span></span></div>
+          </label>
+          <div class="ann-title">Annotations</div>
+        </div>
+
+        <label class="ctn-view">
+          <input id="view-check" type="checkbox" checked>
+          <div class="ctn-img">
+            <img src="assets/cam-outer.png" alt="">
+            <img class="second" src="assets/cam-inner.png" alt="">
+          </div>
+          <div class="ann-title">View</div>
         </label>
       </div>
     </div>
+
     <div id="ctn-ann"></div>
 
     <!-- <div id="ann1" class="ann">

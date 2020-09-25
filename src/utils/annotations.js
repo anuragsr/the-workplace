@@ -90,6 +90,13 @@ const annArr =
     line3: "Virtual meets and social media",
     line4: "are the ways to collaborate!",
     // up: true
+  },                  
+  { 
+    line1: "A mersmerizing work of art is",
+    line2: "very inspiring for one to",
+    line3: "contribute great things and",
+    line4: "push their limits positively!",
+    up: true
   },
 ]
 

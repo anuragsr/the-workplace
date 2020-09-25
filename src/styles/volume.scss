@@ -1,8 +1,15 @@
+.ctn-volume{
+  .ann-title{    
+    left: 40px;
+    top: -8px;
+  }
+}
 .volume {
   transform: scale(.5);
   --line: #fff;
   --line-width: 6px;
   --duration: .5s;
+  display: block;
   position: relative;  
   z-index: 1;
   cursor: pointer;
@@ -61,7 +68,7 @@
       }
     }
   }
-}
+}    
 
 @keyframes small {
     0%,

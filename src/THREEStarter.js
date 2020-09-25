@@ -103,7 +103,7 @@ export default class THREEStarter {
     this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 
     this.mouse = new THREE.Vector2()
-    // this.enableInspector()
+    this.enableInspector()
   }
   enableInspector(){
     // For THREE Inspector    
@@ -365,11 +365,11 @@ export default class THREEStarter {
   introduce(obj){
     this.scene.add(obj)
     count++
-    l(`${count} of 25 items added : ${obj.name}`)
+    l(`${count} of 26 items added : ${obj.name}`)
     $("#ctn-loader .load span").html(
-      `Loading ${Math.round(count*100/25)}%`
+      `Loading ${Math.round(count*100/26)}%`
     )
-    if(count === 25){
+    if(count === 26){
       l("All items added!")
       this.enableEnter()
     }
@@ -426,10 +426,12 @@ export default class THREEStarter {
       }
       $("#smoke").toggleClass("lights-off")
     })    
-    
+        
+    $("#view-check").on("change", e => this.toggleCameraView($(e.target).prop('checked')))
+
     $("#ann-check").on("change", e => this.toggleAllAnnotations($(e.target).prop('checked')))
     
-    $(".ann button").on("click", this.toggleSingleAnnotation.bind(this))
+    $(".ann button").on("click", this.toggleSingleAnnotation.bind(this))  
   }
   resize() {
     let {
@@ -526,6 +528,17 @@ export default class THREEStarter {
     if(!value) $(".ann").fadeOut()
     else $(".ann").fadeIn() 
   }
+  toggleCameraView(value){
+    if(value){
+      new gsap.timeline()
+      .to(this.currentCamera.position, { duration: 1.5, y: 50, z: 35 }, "lb0")
+      .to(this.currentCamera.rotation, { duration: 1.5, x: -.1 }, "lb0")
+    } else {
+      new gsap.timeline()
+      .to(this.currentCamera.position, { duration: 1.5, y: 100, z: 0 }, "lb0")
+      .to(this.currentCamera.rotation, { duration: 1.5, x: -Math.PI / 2 }, "lb0")
+    }
+  }
   enterRoom(){
     l("Start the show!")
       
@@ -616,18 +629,21 @@ export default class THREEStarter {
       this.introduce(ceilingGroup)
     }
     , addWall = () => {
-      texLdr.load('assets/textures/wall.png', wallBg => {
+      texLdr.load('assets/textures/blk1.jpg', wallBg => {
+      // texLdr.load('assets/textures/wall.png', wallBg => {
         const { roomHeight } = this
         , wall = createMesh(
           new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, 2 * Math.PI ),
           new THREE.MeshPhongMaterial({ 
             side: THREE.BackSide, map: wallBg, 
+            shininess: 0
             // transparent: true, opacity: 0
           }),
           {
             minFilter: THREE.LinearFilter,
             wrapping: THREE.RepeatWrapping,
-            repeat: new THREE.Vector2(120, 15),
+            repeat: new THREE.Vector2(27, 3),
+            // repeat: new THREE.Vector2(120, 15),
           }
         )
             
@@ -838,8 +854,8 @@ export default class THREEStarter {
         coffee.scale.multiplyScalar(.75)
         snbGr.add(coffee)
               
-        const smoke = new CSS3DSprite($("#smoke")[0])
-        smoke.position.set(-23.75, 39, -111.5)
+        const smoke = new CSS3DObject($("#smoke")[0])
+        smoke.position.set(-24, 39, -111.5)
         this.introduceCSS3D(smoke)
       })
 
@@ -1115,10 +1131,37 @@ export default class THREEStarter {
           this.introduce(guitar)
 
           const ann = new CSS3DSprite($("#ann12")[0])
-          ann.position.set(90, 40, -60)
+          ann.position.set(90, 35, -60)
           ann.scale.multiplyScalar(.18)
           this.introduceCSS3D(ann)
         })
+      })
+    }
+    , addPainting = () => {
+      const geo = new THREE.PlaneGeometry(20, 20)
+      , pos = [110, 70, -95]
+      , rot= [0, -.85, 0], m = 2.5
+
+      texLdr.load('assets/textures/painting.jpg', tex => { 
+        // l(currTex, tex, idx)
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
+        const painting = createMesh(
+          geo, new THREE.MeshPhongMaterial({ 
+            map: tex, shininess: 0  
+          })
+        )
+        painting.scale.set(1, tex.image.height / tex.image.width, 1)
+        painting.scale.multiplyScalar(m)
+
+        painting.position.set(pos[0], pos[1], pos[2])
+        painting.rotation.set(rot[0], rot[1], rot[2])
+        painting.name = "Painting"
+        this.introduce(painting)
+        
+        const ann = new CSS3DSprite($("#ann14")[0])
+        ann.position.set(63, 60, -65)
+        ann.scale.multiplyScalar(.15)
+        this.introduceCSS3D(ann)
       })
     }
 
@@ -1150,6 +1193,8 @@ export default class THREEStarter {
       addPlantsAndWindow()
       // Adding Chair, Guitar
       addChairAndGuitar()
+      // Adding Painting
+      addPainting()
     })()
   }
   postProcess(){
