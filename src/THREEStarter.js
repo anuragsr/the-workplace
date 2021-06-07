@@ -46,14 +46,14 @@ export default class THREEStarter {
     this.scene2 = new THREE.Scene()
 
     this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
-    
+
     this.roomCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
     this.roomCameraHelper = new THREE.CameraHelper(this.roomCamera)
 
     this.blurCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000)
     this.blurCamera.name = "Blur Camera"
     this.blurCameraHelper = new THREE.CameraHelper(this.blurCamera)
-    
+
     this.mouseCamera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 2000)
     this.mouseCamera.name = "Mouse Camera"
     this.mouseCameraHelper = new THREE.CameraHelper(this.mouseCamera)
@@ -74,7 +74,7 @@ export default class THREEStarter {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls2 = new OrbitControls(this.camera, this.renderer2.domElement)
-    this.roomControls = new PointerLockControls(this.roomCamera, this.renderer.domElement)     
+    this.roomControls = new PointerLockControls(this.roomCamera, this.renderer.domElement)
 
     this.spotLightMesh1 = new THREE.Mesh(
       new THREE.SphereGeometry(5, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2),
@@ -92,14 +92,14 @@ export default class THREEStarter {
     this.loader = new THREELoader()
     // this.currentCamera = this.camera
     this.currentCamera = this.blurCamera
-    
+
     this.stats = new Stats()
     document.body.appendChild(this.stats.dom)
 
     // Store work lights
     this.workLightArr = []
     this.workLightIntensity = 2
-    this.roomHeight = 100    
+    this.roomHeight = 100
 
     this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 
@@ -107,7 +107,7 @@ export default class THREEStarter {
     // this.enableInspector()
   }
   enableInspector(){
-    // For THREE Inspector    
+    // For THREE Inspector
     window.THREE = THREE
     window.scene = this.scene
   }
@@ -121,20 +121,20 @@ export default class THREEStarter {
     this.toggleHelpers(show)
     this.addListeners()
     this.postProcess()
-    
+
     require('webfontloader').load({
       custom: { families: ['ar-l', 'ar-t', 'clock'] },
       active: () => {
         l("All fonts have loaded.")
         gsap.to("#ctn-bg",{ duration: .5, opacity: .8 })
         gsap.to("#ctn-loader .load",{ duration: .5, opacity: 1 })
-        
+
         $('body').waitForImages(() => {
-          l('All images have loaded.')          
-          
+          l('All images have loaded.')
+
           // Adding Floor to give base idea
           this.addFloor()
-          
+
           // Adding Sound
           this.addSounds()
         })
@@ -142,14 +142,14 @@ export default class THREEStarter {
     })
   }
   initScene(){
-    const { 
+    const {
       ctn, w, h, camera, scene, origin, roomControls,
       renderer, renderer2, roomCamera, blurCamera,
       mouseCamera, cameraStartPos,
     } = this
 
     // Renderer settings
-    renderer.setClearColor(0x000000, 0)    
+    renderer.setClearColor(0x000000, 0)
     renderer.setSize(w, h)
     renderer.domElement.className = "canvas-webGL"
     ctn.append(renderer.domElement)
@@ -161,7 +161,7 @@ export default class THREEStarter {
     // Cameras and ambient light
     camera.position.copy(cameraStartPos)
     camera.lookAt(origin)
-    scene.add(camera)    
+    scene.add(camera)
 
     roomCamera.position.copy(origin)
     roomCamera.position.y = 50
@@ -226,23 +226,23 @@ export default class THREEStarter {
 
   }
   addFloor() {
-    const texLdr = new THREE.TextureLoader()    
+    const texLdr = new THREE.TextureLoader()
     , { createMesh } = this
     texLdr.load('assets/textures/floor.png', floorImg => {
       texLdr.load('assets/textures/floorBump.jpg', floorBump => {
         const floor = createMesh(
           new THREE.CircleGeometry( 150, 64 ),
-          new THREE.MeshPhongMaterial({ 
-            map: floorImg, 
-            bumpMap: floorBump, 
+          new THREE.MeshPhongMaterial({
+            map: floorImg,
+            bumpMap: floorBump,
             bumpScale: .1
           })
         )
-  
+
         floor.receiveShadow = true
         floor.rotation.set(-Math.PI / 2, 0, -Math.PI / 2 + .4)
         floor.name = "Floor"
-  
+
         this.introduce(floor)
         this.startLoadingTl()
       })
@@ -255,12 +255,12 @@ export default class THREEStarter {
 
     tl3D
     .to(this.currentCamera.position, { duration, y: 500 })
-  
+
     tlCSS
     .to("#ctn-bg", { duration, scale: 1.15 }, "lb0")
     .to(".content .item", { duration: 2.5, opacity: 1, stagger }, "lb0")
 
-    // Uncomment below 3 lines for testing    
+    // Uncomment below 3 lines for testing
     // tl3D.seek(tl3D.duration())
     // tlCSS.seek(tlCSS.duration())
     // this.enableEnter()
@@ -283,8 +283,8 @@ export default class THREEStarter {
     , workLights = gui.add(params, 'workLights')
 
     he.onChange(value => this.toggleHelpers(value))
-    defaultCam.onChange(() => { 
-      this.roomControls.unlock() 
+    defaultCam.onChange(() => {
+      this.roomControls.unlock()
       this.currentCamera = this.camera
     })
     roomCam.onChange(() => { this.roomControls.lock() })
@@ -294,8 +294,8 @@ export default class THREEStarter {
     workLights.onChange(value => {
       if(!value){
         this.workLightArr.slice().reverse().forEach((lt, idx) => {
-          setTimeout(() => { 
-            lt.intensity = 0 
+          setTimeout(() => {
+            lt.intensity = 0
           }, idx * 200)
         })
       } else {
@@ -329,16 +329,16 @@ export default class THREEStarter {
     }
   }
   render(now) {
-    const { 
+    const {
       renderer, renderer2,
       stats, scene, scene2,
-      currentCamera, composer 
+      currentCamera, composer
     } = this
 
     try{
       stats.begin()
       // monitored code goes here
-      
+
       now *= 0.001;  // convert to seconds
       const deltaTime = now - then;
       then = now;
@@ -382,18 +382,18 @@ export default class THREEStarter {
   introduceCSS3D(obj){ this.scene2.add(obj) }
   addListeners() {
     gsap.ticker.add(this.render.bind(this))
-    window.addEventListener('resize', this.resize.bind(this), false)    
+    window.addEventListener('resize', this.resize.bind(this), false)
     window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
 
     this.roomControls.addEventListener('lock', () => {
-      this.currentCamera = this.roomCamera 
+      this.currentCamera = this.roomCamera
       this.controls.enabled = false
     })
     this.roomControls.addEventListener('unlock', () => {
-      this.currentCamera = this.camera 
+      this.currentCamera = this.camera
       this.controls.enabled = true
     })
-  
+
     $("button.item").on("click", () => {
       this.enterRoom()
 
@@ -403,7 +403,7 @@ export default class THREEStarter {
       this.mediaElement.volume = bgVolume
       this.mediaElement.play()
     })
-    
+
     $("#mute-check").on("change", e => {
       const volume = !$(e.target).prop('checked') ? 1 : 0
       this.sound.setVolume(volume ? bgVolume: volume)
@@ -413,7 +413,7 @@ export default class THREEStarter {
       this.lightsSound.setVolume(volume)
       this.buttonSound.setVolume(volume)
     })
-    
+
     $("#light-check").on("change", e => {
       this.lightsSound.play()
 
@@ -429,26 +429,26 @@ export default class THREEStarter {
         })
       }
       $("#smoke").toggleClass("lights-off")
-    })    
-        
+    })
+
     $("#view-check").on("change", e => this.toggleCameraView($(e.target).prop('checked')))
 
     $("#ann-check").on("change", e => this.toggleAllAnnotations($(e.target).prop('checked')))
-    
-    $(".ann button").on("click", this.toggleSingleAnnotation.bind(this))  
+
+    $(".ann button").on("click", this.toggleSingleAnnotation.bind(this))
   }
   resize() {
     let {
       w, h, ctn, camera, blurCamera,
       roomCamera, renderer, renderer2, mouseCamera
     } = this
-    
+
     w = ctn.width()
     h = ctn.height()
 
     camera.aspect = w / h
     camera.updateProjectionMatrix()
-  
+
     roomCamera.aspect = w / h
     roomCamera.updateProjectionMatrix()
 
@@ -457,7 +457,7 @@ export default class THREEStarter {
 
     mouseCamera.aspect = w / h
     mouseCamera.updateProjectionMatrix()
-  
+
     renderer.setSize(w, h)
     renderer2.setSize(w, h)
   }
@@ -489,7 +489,7 @@ export default class THREEStarter {
       }
 
       // this.mouseCamera.rotation.x = (this.mouse.y * .03) + offset
-      // this.mouseCamera.rotation.y = (-this.mouse.x * .5)      
+      // this.mouseCamera.rotation.y = (-this.mouse.x * .5)
     }
   }
   toggleSingleAnnotation(e){
@@ -497,20 +497,20 @@ export default class THREEStarter {
     , status = e.currentTarget.dataset.status
     , path = $(`${id} path`)
     , text = $(`${id} text`)
-    
+
     // l("Event:", e)
     // l("button:", e.currentTarget , "remaining:", $(".ann button").not(e.currentTarget))
-    
+
     if(status === "off"){
       this.openSound.play()
-      gsap.to(path, { 
+      gsap.to(path, {
         strokeDashoffset: 0, fill: "rgba(32, 160, 128, .95)",
         duration: 1, onComplete: () => {
           e.currentTarget.dataset.status = "on"
         }
       })
-      gsap.to($(".ann path").not(path), { 
-        strokeDashoffset: 584.852783203125, 
+      gsap.to($(".ann path").not(path), {
+        strokeDashoffset: 584.852783203125,
         fill: "transparent", duration: .5,
         onComplete: () => {
           $(".ann button").not(e.currentTarget)
@@ -521,7 +521,7 @@ export default class THREEStarter {
       gsap.to($(".ann text").not(text), { opacity: 0, duration: .5 })
     } else {
       this.closeSound.play()
-      gsap.to(path, { 
+      gsap.to(path, {
         strokeDashoffset: 584.852783203125, fill: "transparent",
         duration: .5, onComplete: () => {
           e.currentTarget.dataset.status = "off"
@@ -532,22 +532,22 @@ export default class THREEStarter {
   }
   toggleAllAnnotations(value){
     this.buttonSound.play()
-    gsap.to(".ann path", { 
+    gsap.to(".ann path", {
       strokeDashoffset: 584.852783203125,
-      fill: "transparent", duration: .5, 
+      fill: "transparent", duration: .5,
       onComplete: () => {
         $(".ann button").each(function(){ this.dataset.status = "off" })
       }
     })
     gsap.to(".ann text", { opacity: 0, duration: .5 })
-    
+
     if(!value) $(".ann").fadeOut()
-    else $(".ann").fadeIn() 
+    else $(".ann").fadeIn()
   }
   toggleCameraView(value){
     isDefaultCameraView = value
     canMoveMouse = false
-    
+
     const duration = 1.5
     , tl = new gsap.timeline({ onComplete: () => canMoveMouse = true })
 
@@ -565,9 +565,9 @@ export default class THREEStarter {
   }
   enterRoom(){
     l("Start the show!")
-      
+
     this.currentCamera = this.mouseCamera
-    // window.currentCamera = this.currentCamera
+    window.currentCamera = this.currentCamera
 
     gsap.to("#ctn-loader", {
       duration: .3, scale: 1.25, opacity: 0,
@@ -599,9 +599,9 @@ export default class THREEStarter {
   addObjects(){
     const { renderer, scene, createMesh } = this
     , mgr = new THREE.LoadingManager()
-    , texLdr = new THREE.TextureLoader(mgr)    
+    , texLdr = new THREE.TextureLoader(mgr)
     , fbx = new FBXLoader(mgr)
-    , gltf = new GLTFLoader(mgr)  
+    , gltf = new GLTFLoader(mgr)
     , mtl = new MTLLoader(mgr)
     , tds = new TDSLoader(mgr)
     , addCeiling = () => {
@@ -609,48 +609,48 @@ export default class THREEStarter {
       , ceilingGroup = new THREE.Group()
       , ceiling = createMesh(
         new THREE.CircleGeometry( 150, 64 ),
-        new THREE.MeshPhongMaterial({ 
+        new THREE.MeshPhongMaterial({
           color: 0xeacde7,
           side: THREE.BackSide,
           // transparent: true, opacity: 0
         })
       )
-  
+
       ceilingGroup.name = "Ceiling Group"
-      
+
       // ceiling.visible = false
       ceiling.name = "Ceiling"
       ceilingGroup.add(ceiling)
-          
+
       // Lights
       // const light1 = new THREE.PointLight( 0xffffff, 0, 130)
       const light1 = new THREE.PointLight( 0xffffff, workLightIntensity, 130)
-      // light1.add( createMesh( 
+      // light1.add( createMesh(
       //     new THREE.SphereBufferGeometry(2, 4, 2),
-      //     new THREE.MeshBasicMaterial({ 
-      //       transparent: true, opacity: 0, color: 0xffffff 
+      //     new THREE.MeshBasicMaterial({
+      //       transparent: true, opacity: 0, color: 0xffffff
       //     })
-      //   ) 
+      //   )
       // )
       light1.name = "Spotlight"
       light1.castShadow = true
-  
+
       const light2 = light1.clone()
       , light3 = light1.clone()
       , light4 = light1.clone()
-  
+
       ceilingGroup.add(light1, light2, light3, light4)
       this.workLightArr.push(light1, light2, light3, light4)
-      
+
       light1.position.set(-75, -50, -10)
       light2.position.set(-35, -120, -10)
       light3.position.set(35, -120, -10)
       light4.position.set(75, -50, -10)
-  
+
       // ceilingGroup.rotation.set(0, Math.PI, 0) // Normal
       ceilingGroup.rotation.set(Math.PI/2, Math.PI, 0)  // As Ceiling
       ceilingGroup.position.set(0, roomHeight, 0)
-  
+
       // scene.add(ceilingGroup)
       this.introduce(ceilingGroup)
     }
@@ -660,8 +660,8 @@ export default class THREEStarter {
         const { roomHeight } = this
         , wall = createMesh(
           new THREE.CylinderGeometry( 150, 150, roomHeight, 64, 1, true, Math.PI/2, 2 * Math.PI ),
-          new THREE.MeshPhongMaterial({ 
-            side: THREE.BackSide, map: wallBg, 
+          new THREE.MeshPhongMaterial({
+            side: THREE.BackSide, map: wallBg,
             shininess: 0
             // transparent: true, opacity: 0
           }),
@@ -672,7 +672,7 @@ export default class THREEStarter {
             // repeat: new THREE.Vector2(120, 15),
           }
         )
-            
+
         wall.position.set(0, roomHeight / 2, 0)
         wall.name = "Wall"
         // wall1.receiveShadow = true
@@ -698,31 +698,31 @@ export default class THREEStarter {
           {
             minFilter: THREE.LinearFilter,
             wrapping: THREE.RepeatWrapping,
-            repeat: new THREE.Vector2(.04, .04), 
+            repeat: new THREE.Vector2(.04, .04),
           }
         )
         , tableLeg1 = createMesh(
           new THREE.CylinderGeometry( 2, 1, 25, 64, 1, false, 0, 2 * Math.PI),
           new THREE.MeshPhongMaterial({ color: 0x000000 }),
         )
-        
+
         tableGroup.name = "Table Group"
-        
+
         table.name = "Table"
         table.position.set( 0, 25, 0 )
         table.rotation.set( -Math.PI/2, 0 ,0 )
         table.castShadow = true
-        
+
         tableLeg1.castShadow = true
         const tableLeg2 = tableLeg1.clone()
         , tableLeg3 = tableLeg1.clone()
         , tableLeg4 = tableLeg1.clone()
-        
+
         tableLeg1.position.set( 60, 25 / 2, -95 )
         tableLeg2.position.set( -60, 25 / 2, -95 )
         tableLeg3.position.set( -70, 25 / 2, -125 )
         tableLeg4.position.set( 70, 25 / 2, -125 )
-    
+
         tableGroup.add(table, tableLeg1, tableLeg2, tableLeg3, tableLeg4)
         tableGroup.scale.set(.85, 1, .9)
         tableGroup.position.set(0, 0, -10)
@@ -737,29 +737,29 @@ export default class THREEStarter {
     }
     , addPosters = () => {
       const posters = [
-        { 
+        {
           image: 'assets/textures/poster1.jpg', name: 'poster1',
-          pos: [-55, 60, -137], rot: [0, .25, 0], m: 1 
+          pos: [-55, 60, -137], rot: [0, .25, 0], m: 1
         },
-        { 
+        {
           image: 'assets/textures/poster2.jpg', name: 'poster2',
           pos: [-24, 62, -145], rot: [0, .1, 0], m: 1.2
         },
-        { 
+        {
           image: 'assets/textures/poster3.jpg', name: 'poster3',
           pos: [20, 65, -143], rot: [0, -.15, 0], m: 2
         },
-        { 
+        {
           image: 'assets/textures/poster4.jpg', name: 'poster4',
           pos: [60, 65, -133], rot: [0, -.3, 0], m: 1.2
         },
       ]
-  
+
       posters.forEach(currTex => {
         const { image, pos, rot, m } = currTex
         , geo = new THREE.PlaneGeometry(20, 20)
-  
-        texLdr.load(image, tex => { 
+
+        texLdr.load(image, tex => {
           // l(currTex, tex, idx)
           tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
           const posterMesh = createMesh(
@@ -773,7 +773,7 @@ export default class THREEStarter {
           this.introduce(posterMesh)
         })
       })
-      
+
       const ann = new CSS3DSprite($("#ann1")[0])
       ann.position.set(-5, 75, -125)
       ann.scale.multiplyScalar(.22)
@@ -797,40 +797,40 @@ export default class THREEStarter {
           monitorPr.position.set(-4.5, 0, 0)
           monitorPr.rotation.set(0, -Math.PI / 2, 0)
           monitorGroup.add(monitorPr)
-          
+
           const screenPr = new CSS3DObject($("#monitorPr")[0])
           screenPr.position.set(14.25, 37, -122)
           screenPr.rotation.set(0, -.08, 0)
           this.introduceCSS3D(screenPr)
         })
       })
-      fbx.load('assets/models/pc/PcMonitor.fbx', monitorSc => { 
+      fbx.load('assets/models/pc/PcMonitor.fbx', monitorSc => {
         const rot = .35, monX = 24, monY = -.2, monZ = 12
         monitorSc.name = "Secondary 1"
         monitorSc.scale.multiplyScalar(.06)
         monitorSc.position.set(-monX, monY, monZ)
         monitorSc.rotation.set(0, -Math.PI / 2 + rot, 0)
         monitorGroup.add(monitorSc)
-  
+
         const monitorSc2 = monitorSc.clone()
         monitorSc2.name = "Secondary 2"
         monitorSc2.position.set(monX, monY, monZ)
         monitorSc2.rotation.set(0, -Math.PI / 2 - rot, 0)
         monitorGroup.add(monitorSc2)
-        
+
         const screenSc1 = new CSS3DObject($("#monitorSc1")[0])
         screenSc1.position.set(-10, 36, -119)
         screenSc1.rotation.set(0, .27, 0)
         this.introduceCSS3D(screenSc1)
-        
+
         const screenSc2 = new CSS3DObject($("#monitorSc2")[0])
         screenSc2.position.set(37.5, 36, -115.5)
         screenSc2.rotation.set(0, -.42, 0)
         this.introduceCSS3D(screenSc2)
       })
-      
+
       // CPu, Keyboard, Mouse
-      gltf.load('assets/models/pc/cpu_1/scene.gltf', obj => { 
+      gltf.load('assets/models/pc/cpu_1/scene.gltf', obj => {
         const cpu = obj.scene
         cpu.name = "CPU"
         cpu.position.set(55, 27, -105)
@@ -838,7 +838,7 @@ export default class THREEStarter {
         cpu.scale.multiplyScalar(4.5)
         this.introduce(cpu)
       })
-      gltf.load('assets/models/pc/km/scene.gltf', obj => { 
+      gltf.load('assets/models/pc/km/scene.gltf', obj => {
         const km = obj.scene
         km.name = "Keyboard, Mouse"
         km.scale.multiplyScalar(1.9)
@@ -846,7 +846,7 @@ export default class THREEStarter {
         km.rotation.set(0, -.08, 0)
         this.introduce(km)
       })
-      
+
       const ann = new CSS3DSprite($("#ann2")[0])
       ann.position.set(45, 40, -100)
       ann.scale.multiplyScalar(.18)
@@ -860,26 +860,26 @@ export default class THREEStarter {
       snbGr.rotation.set(0, .32, 0)
       this.introduce(snbGr)
 
-      gltf.load('assets/models/notepad/scene.gltf', obj => { 
-        const notepad = obj.scene 
+      gltf.load('assets/models/notepad/scene.gltf', obj => {
+        const notepad = obj.scene
         notepad.name = "NotePad"
         notepad.scale.multiplyScalar(25)
         snbGr.add(notepad)
       })
-      gltf.load('assets/models/penstand/scene.gltf', obj => { 
-        const penstand = obj.scene 
+      gltf.load('assets/models/penstand/scene.gltf', obj => {
+        const penstand = obj.scene
         penstand.name = "Pen Stand"
         penstand.position.set(14, -35.8, -5)
         penstand.scale.multiplyScalar(1.68)
         snbGr.add(penstand)
       })
-      gltf.load('assets/models/coffee/scene.gltf', obj => { 
-        const coffee = obj.scene 
+      gltf.load('assets/models/coffee/scene.gltf', obj => {
+        const coffee = obj.scene
         coffee.name = "Coffee"
         coffee.position.set(0, -19, 7)
         coffee.scale.multiplyScalar(.75)
         snbGr.add(coffee)
-              
+
         const smoke = new CSS3DObject($("#smoke")[0])
         smoke.position.set(-24, 39, -111.5)
         this.introduceCSS3D(smoke)
@@ -897,19 +897,19 @@ export default class THREEStarter {
         , h = today.getHours()
         , m = checkTime(today.getMinutes())
         , s = checkTime(today.getSeconds())
-        
+
         $("#time").html(`${wd} ${h}:${m}:${s}`)
-        
+
         setTimeout(startTime, 1000)
       }
       , checkTime = i => i < 10 ? `0${i}` : i
-    
+
       const timeDiv = new CSS3DObject($("#time")[0])
       timeDiv.rotation.set(0, .3, 0)
       timeDiv.position.set(-50, 30, -100)
       this.introduceCSS3D(timeDiv)
-  
-      const length = 16, width = 2  
+
+      const length = 16, width = 2
       , extrudeSettings = {
         steps: 1,
         depth: 0,
@@ -942,28 +942,28 @@ export default class THREEStarter {
       this.introduceCSS3D(ann)
     }
     , addRouterPhoneAndStatue = () => {
-      gltf.load('assets/models/router/scene.gltf', obj => { 
-        const router = obj.scene 
+      gltf.load('assets/models/router/scene.gltf', obj => {
+        const router = obj.scene
         router.name = "Wifi Router"
         router.scale.multiplyScalar(.03)
         router.rotation.set(0, Math.PI / 2 + .2, 0)
         router.position.set(-36.54, 27.6, -120)
         this.introduce(router)
       })
-      gltf.load('assets/models/phone/scene.gltf', obj => { 
-        const phone = obj.scene 
+      gltf.load('assets/models/phone/scene.gltf', obj => {
+        const phone = obj.scene
         phone.name = "Phone"
         phone.rotation.set(0, Math.PI / 2 + .2, 0)
         phone.position.set(-2, 27, -108)
         phone.scale.multiplyScalar(.7)
         this.introduce(phone)
-  
+
         const screenPh = new CSS3DObject($("#phone")[0])
         screenPh.rotation.set(-Math.PI/2, 0, 0 + .2)
         screenPh.position.set(-2, 27.5, -108)
         screenPh.scale.multiplyScalar(.7)
         this.introduceCSS3D(screenPh)
-        
+
         const ann = new CSS3DSprite($("#ann13")[0])
         ann.position.set(-4, 28, -80)
         ann.scale.multiplyScalar(.16)
@@ -985,10 +985,10 @@ export default class THREEStarter {
           showpiece.children[1].material.color = new THREE.Color(0xD3D3D3)
           showpiece.children[1].material.needsUpdate = true
           showpiece.children[1].castShadow = true
-    
+
           this.introduce(showpiece)
-    
-          gsap.to(showpiece.rotation, { 
+
+          gsap.to(showpiece.rotation, {
             z: "+=" + 2 * Math.PI, repeat: -1,
             duration: 20, ease: Linear.easeNone
           })
@@ -998,11 +998,11 @@ export default class THREEStarter {
           ann.scale.multiplyScalar(.18)
           this.introduceCSS3D(ann)
         })
-      })      
+      })
     }
     , addDoorCouchAndAC = () => {
-      fbx.load('assets/models/door/Door_Component_BI3.fbx', group => { 
-        const door = group 
+      fbx.load('assets/models/door/Door_Component_BI3.fbx', group => {
+        const door = group
         door.scale.multiplyScalar(.3)
         door.position.set(-143, 0, -44)
         door.rotation.set(0, 1.26, 0)
@@ -1014,20 +1014,20 @@ export default class THREEStarter {
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
       })
-      gltf.load('assets/models/ac/scene.gltf', obj => { 
-        const ac = obj.scene 
+      gltf.load('assets/models/ac/scene.gltf', obj => {
+        const ac = obj.scene
         ac.name = "AC"
         ac.traverse(child => child.isMesh && (child.castShadow = true))
         ac.scale.multiplyScalar(2.42)
         ac.position.set(-117.58, 72, -84.38)
         ac.rotation.set(0, .92, 0)
         this.introduce(ac)
-        
+
         const ann = new CSS3DSprite($("#ann7")[0])
         ann.position.set(-100, 80, -85)
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
-      }) 
+      })
       tds.load('assets/models/sofa/the chair modeling.3ds', object => {
         const couch = object
         couch.name = "Couch"
@@ -1038,7 +1038,7 @@ export default class THREEStarter {
         couch.traverse(child => {
           if(child.isMesh){
             if(['Cylinder', 'Cylinder.001', 'Cylinder.002', 'Cylinder.003'].includes(child.name))
-              child.material.color = new THREE.Color(0x5b1212)            
+              child.material.color = new THREE.Color(0x5b1212)
             else child.material.color = new THREE.Color(0x000000)
 
             child.material.shininess = 10
@@ -1046,26 +1046,26 @@ export default class THREEStarter {
           }
         })
         this.introduce(couch)
-        
+
         const ann = new CSS3DSprite($("#ann8")[0])
         ann.position.set(-85, 35, -80)
         ann.scale.multiplyScalar(.18)
         this.introduceCSS3D(ann)
       })
-      
+
     }
     , addPlantsAndWindow = () => {
-      fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => { 
-        const plant1 = group.children[2] 
+      fbx.load('assets/models/plant/indoor plant_02_+2.fbx', group => {
+        const plant1 = group.children[2]
         plant1.name = "Plant 1"
         plant1.scale.multiplyScalar(.04)
         plant1.position.set(-85.14, 0, -108)
         plant1.rotation.set(-1.57, 0, 1.36)
         plant1.castShadow = true
         this.introduce(plant1)
-    
+
         const plant2 = plant1.clone()
-        plant2.name = "Plant 2"    
+        plant2.name = "Plant 2"
         plant2.position.set(84.10, 0, -108)
         plant2.rotation.set(-1.57, 0, 2.74)
         this.introduce(plant2)
@@ -1087,8 +1087,8 @@ export default class THREEStarter {
       ann.position.set(135, 60, -60)
       ann.scale.multiplyScalar(.18)
       this.introduceCSS3D(ann)
-      
-      texLdr.load('assets/textures/window.jpg', windowTex => { 
+
+      texLdr.load('assets/textures/window.jpg', windowTex => {
         const winBg = createMesh(
           new THREE.PlaneGeometry(20, 20),
           new THREE.MeshPhongMaterial({ map: windowTex })
@@ -1097,14 +1097,14 @@ export default class THREEStarter {
         winBg.position.set(0, 10.48, -1.12)
         windowGroup.add(winBg)
       })
-      gltf.load('assets/models/window/scene.gltf', sc => { 
-        const window = sc.scene 
+      gltf.load('assets/models/window/scene.gltf', sc => {
+        const window = sc.scene
         window.children[0].children[0].children[0].children[0].visible = false
         window.children[0].children[0].children[0].children[2].position.set(33.86, .98, 38.59)
         window.scale.set(.31, .26, .25)
         windowGroup.add(window)
       })
-    }    
+    }
     , addChairAndGuitar = () => {
       tds.load('assets/models/chair/armchair_BLEND.3ds', object => {
         const chair = object
@@ -1168,12 +1168,12 @@ export default class THREEStarter {
       , pos = [110, 70, -95]
       , rot= [0, -.85, 0], m = 2.5
 
-      texLdr.load('assets/textures/painting.jpg', tex => { 
+      texLdr.load('assets/textures/painting.jpg', tex => {
         // l(currTex, tex, idx)
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
         const painting = createMesh(
-          geo, new THREE.MeshPhongMaterial({ 
-            map: tex, shininess: 0  
+          geo, new THREE.MeshPhongMaterial({
+            map: tex, shininess: 0
           })
         )
         painting.scale.set(1, tex.image.height / tex.image.width, 1)
@@ -1183,7 +1183,7 @@ export default class THREEStarter {
         painting.rotation.set(rot[0], rot[1], rot[2])
         painting.name = "Painting"
         this.introduce(painting)
-        
+
         const ann = new CSS3DSprite($("#ann14")[0])
         ann.position.set(63, 60, -65)
         ann.scale.multiplyScalar(.15)
@@ -1202,7 +1202,7 @@ export default class THREEStarter {
       // Adding Wall
       addWall()
       // Adding Table, Table legs
-      addTable()   
+      addTable()
       // Adding Posters
       addPosters()
       // Adding PC
@@ -1249,7 +1249,7 @@ export default class THREEStarter {
 
     this.composer = composer
     // window.composer = composer
-    
+
     // const gui = new dat.GUI();
     // {
     //   const folder = gui.addFolder('BloomPass');

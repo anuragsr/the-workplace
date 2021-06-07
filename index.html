@@ -3,16 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>The Workspace | Great Work Happens</title>     
-    <!-- Mobile header color for Chrome, Firefox OS and Opera -->
-    <meta name="theme-color" content="#ff4970">
-    <!-- Mobile header color Windows Phone -->
-    <meta name="msapplication-navbutton-color" content="#ff4970">
-    <!-- Mobile header color for iOS Safari (supports black, black-translucent or default) -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">    
+    <title>The Workspace | Great Work Happens</title>
     <style>
-      body{ 
-        background: rgb(0, 0, 0); 
+      body{
+        background: rgb(0, 0, 0);
         overflow: hidden; color: #fff;
       }
       #ctn-bg{
@@ -21,17 +15,17 @@
         opacity: 0;
       }
       #ctn-css3D, #ctn-ann{ display: none; }
-      #ctn-loader .load, 
-      #ctn-loader .item{ 
-        opacity: 0; 
+      #ctn-loader .load,
+      #ctn-loader .item{
+        opacity: 0;
       }
       .dg.ac{ z-index: 3!important; }
-      .canvas-webGL{ 
+      .canvas-webGL{
         position: absolute;
         top: 0; left: 0;
         z-index: 0;
       }
-      .canvas-css3D{ 
+      .canvas-css3D{
         position: absolute;
         top: 0; left: 0;
         z-index: 1;
@@ -41,9 +35,9 @@
   </head>
   <body class="noselect">
     <div id="ctn-bg"></div>
-    
+
     <div id="ctn-three"></div>
-    
+
     <div id="ctn-loader">
       <div class="load">
         <img src="assets/Blocks-1s-200px2.gif" alt="">
@@ -56,7 +50,7 @@
           Corporate jobs, especially software development have been pushed to change their work culture, with many companies opting for 50%-100% remote work.
         </p>
         <p class="item">
-          So, what does a truly inspiring and efficient workspace consist of? 
+          So, what does a truly inspiring and efficient workspace consist of?
         </p>
         <p class="item">
           Here's my attempt at describing a 3D rendition of an ideal workspace for maximum productivity.<br/>
@@ -64,19 +58,19 @@
         </p>
         <div class="para-bottom item">
           <div>
-            <p><img src="assets/chrome-tr.png" alt=""/>Works best in Google Chrome</p> 
+            <p><img src="assets/chrome-tr.png" alt=""/>Works best in Google Chrome</p>
             <p><img src="assets/mouse-tr.png" alt=""/>Move mouse to navigate the scene</p>
             <p><img src="assets/setting-tr.png" alt=""/>Control the scene with actions on the right</p>
           </div>
           <div>
-            <p><img src="assets/headphone-tr.png" alt=""/>Turn on sound for the full experience</p> 
+            <p><img src="assets/headphone-tr.png" alt=""/>Turn on sound for the full experience</p>
             <p><img src="assets/info-tr.png" alt=""/>Click on the info buttons for more information</p>
           </div>
         </div>
         <button class="item">Enter</button>
       </div>
     </div>
-    
+
     <div id="ctn-css3D">
       <img class="css3d loading" id="monitorPr" src="assets/textures/website.gif" alt=""/>
       <img class="css3d loading" id="monitorSc1" src="assets/textures/coding.gif" alt=""/>
@@ -99,7 +93,7 @@
           </label>
           <div class="ann-title">Sound</div>
         </div>
-        
+
         <div class="ctn-power-switch">
           <div class="power-switch">
             <input id="light-check" type="checkbox" checked/>
@@ -114,7 +108,7 @@
               </svg>
             </div>
           </div>
-          
+
           <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
             <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" id="line">
               <line x1="75" y1="34" x2="75" y2="58"/>
@@ -149,9 +143,9 @@
     <div id="ctn-about">
       <h2>The Workspace</h2>
       <div>
-        by 
-        <a href="http://envisagecyberart.in" target="_blank">Anurag Srivastava</a><br/>      
-        <a href="http://envisagecyberart.in/projects/threejs-experiments" target="_blank">More 3D projects</a>          
+        by
+        <a href="http://envisagecyberart.in" target="_blank">Anurag Srivastava</a><br/>
+        <a href="http://envisagecyberart.in/projects/threejs-experiments" target="_blank">More 3D projects</a>
       </div>
       <a href="https://www.upwork.com/o/profiles/users/~01d929751d145a05ea/" target="_blank">
         <img src="assets/upwork.png" alt="">
@@ -175,7 +169,7 @@
     <!-- <div id="ann1" class="ann">
       <div class="inner">
         <button data-status="off" data-ann="ann1">1</button>
-        <svg>          
+        <svg>
           <path d="M10 10 L30 30 L200 30 L200 120 L50 120 L30 100 L30 30z" />
           <text x="52" y="50">A spacious table is always</text>
           <text x="52" y="70">useful for keeping all </text>
@@ -184,9 +178,9 @@
         </svg>
       </div>
     </div>-->
-    
+
     <script id="tpl" type="text/template">
-      {{@each(it.annArr) => val, index}}        
+      {{@each(it.annArr) => val, index}}
         <div id="ann{{index}}" class="ann">
           <div class="inner">
             <!-- <button data-status="off" data-ann="ann{{index}}">{{index + 1}}</button> -->
@@ -199,7 +193,7 @@
                 <text x="20" y="90">{{val.line3}}</text>
                 <text x="20" y="110">{{val.line4}}</text>
               </svg>
-            {{#else}}        
+            {{#else}}
               <svg>
                 <path d="M10 10 L30 30 L210 30 L210 120 L50 120 L30 100 L30 30z" />
                 <text x="40" y="50">{{val.line1}}</text>
@@ -212,6 +206,6 @@
         </div>
       {{/each}}
     </script>
-    
+
   </body>
 </html>
